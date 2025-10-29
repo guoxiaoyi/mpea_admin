@@ -32,6 +32,17 @@ CREATE TABLE IF NOT EXISTS pages (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
 
+const createNews = `
+CREATE TABLE IF NOT EXISTS news (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(200) NOT NULL,
+  slug VARCHAR(200) UNIQUE NOT NULL,
+  content TEXT,
+  status ENUM('published', 'draft') DEFAULT 'draft',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
 async function main() {
   let serverConn;
   let dbConn;
@@ -57,6 +68,7 @@ async function main() {
 
     await dbConn.execute(createAdmins);
     await dbConn.execute(createPages);
+    await dbConn.execute(createNews);
     console.log('✓ 数据库表已创建/存在');
     process.exit(0);
   } catch (err) {

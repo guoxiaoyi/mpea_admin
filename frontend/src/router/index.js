@@ -23,6 +23,7 @@ const router = createRouter({
         { path: '', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
         { path: 'pages', name: 'pages', component: PageList, meta: { requiresAuth: true } },
         { path: 'pages/new', name: 'page-new', component: PageForm, meta: { requiresAuth: true } },
+        { path: 'pages/:id', name: 'page-edit', component: PageForm, meta: { requiresAuth: true } },
       ]
     },
     {

@@ -44,6 +44,40 @@ class Page {
     };
   }
 
+  // 获取公开页面列表（仅 published）
+  static async findPublished(page = 1, limit = 10, keyword = '') {
+    const pageNum = Number(page) || 1;
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
+    const offset = (pageNum - 1) * limitNum;
+    let query = 'SELECT id, title, path, content, status, created_at, updated_at FROM pages WHERE status = \"published\"';
+    let countQuery = 'SELECT COUNT(*) as total FROM pages WHERE status = \"published\"';
+    const params = [];
+    const countParams = [];
+
+    if (keyword) {
+      query += ' AND (title LIKE ? OR path LIKE ?)';
+      countQuery += ' AND (title LIKE ? OR path LIKE ?)';
+      const searchTerm = `%${keyword}%`;
+      params.push(searchTerm, searchTerm);
+      countParams.push(searchTerm, searchTerm);
+    }
+
+    query += ` ORDER BY created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
+
+    const [rows] = await pool.execute(query, params);
+    const [countResult] = await pool.execute(countQuery, countParams);
+    return { data: rows, total: countResult[0].total, page: pageNum, limit: limitNum };
+  }
+
+  // 根据 path 获取公开页面（仅 published）
+  static async findPublishedByPath(pagePath) {
+    const [rows] = await pool.execute(
+      'SELECT id, title, path, content, status, created_at, updated_at FROM pages WHERE path = ? AND status = \"published\" LIMIT 1',
+      [pagePath]
+    );
+    return rows[0];
+  }
+
   // 根据ID查找页面
   static async findById(id) {
     const [rows] = await pool.execute(

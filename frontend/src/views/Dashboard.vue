@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { fetchPages } from '@/api/page';
+import UiTable from '@/components/UiTable.vue';
 
 const loading = ref(true);
 const stats = ref([
@@ -37,59 +38,50 @@ onMounted(load);
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex items-end justify-between">
+  <div class="space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
       <div>
-        <div class="text-lg font-semibold text-slate-900">概览</div>
-        <p class="text-sm text-slate-500 mt-1">内容与页面的总体情况</p>
+        <h1 class="text-xl font-semibold text-slate-900">概览</h1>
+        <p class="text-sm text-slate-500 mt-1">站点关键指标与最近动态</p>
       </div>
-      <button class="rounded-md border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50" @click="load">刷新</button>
+      <button class="ui-btn-outline" @click="load">刷新</button>
     </div>
 
-    <!-- Stat cards -->
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div v-for="s in stats" :key="s.label" class="rounded-xl bg-white p-5 ring-1 ring-slate-200">
-        <p class="text-sm text-slate-500">{{ s.label }}</p>
-        <p class="mt-2 text-2xl font-semibold text-slate-900" :class="{ 'animate-pulse': loading }">{{ s.value }}</p>
+    <!-- KPI cards BankDash 风格：左色条，右侧数值 -->
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div v-for="s in stats" :key="s.label" class="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+        <div class="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 grid place-items-center">{{ s.label.slice(0,1) }}</div>
+        <div class="min-w-0">
+          <p class="text-xs uppercase tracking-wide text-slate-500">{{ s.label }}</p>
+          <p class="mt-1 text-2xl font-semibold text-slate-900" :class="{ 'animate-pulse': loading }">{{ s.value }}</p>
+        </div>
       </div>
     </div>
 
-    <!-- Recent table -->
-    <div class="rounded-xl bg-white ring-1 ring-slate-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-200">
+    <!-- Recent table: 与 /pages 使用同一 UiTable 组件，确保一致 -->
+    <div class="ui-panel border-none p-0 overflow-hidden">
+      <div class="px-6 py-4 border-b" style="border-color: var(--border)">
         <div class="font-medium text-slate-900">最近页面</div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600">
-            <tr>
-              <th class="px-6 py-2 text-left">标题</th>
-              <th class="px-6 py-2 text-left">路径</th>
-              <th class="px-6 py-2 text-left">状态</th>
-              <th class="px-6 py-2 text-left">更新时间</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td class="px-6 py-4 text-slate-500" colspan="4">加载中…</td>
-            </tr>
-            <tr v-else-if="recent.length === 0">
-              <td class="px-6 py-4 text-slate-500" colspan="4">暂无数据</td>
-            </tr>
-            <tr v-else v-for="row in recent" :key="row.id" class="border-t">
-              <td class="px-6 py-2">{{ row.title }}</td>
-              <td class="px-6 py-2">{{ row.path }}</td>
-              <td class="px-6 py-2">
-                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                      :class="row.status === 'published' ? 'bg-green-50 text-green-700 ring-1 ring-green-200' : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200'">
-                  {{ row.status === 'published' ? '已发布' : '草稿' }}
-                </span>
-              </td>
-              <td class="px-6 py-2">{{ row.updatedAt ? new Date(row.updatedAt).toLocaleString() : '—' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <UiTable
+        :columns="[
+          { key: 'title', label: '标题' },
+          { key: 'path', label: '路径' },
+          { key: 'status', label: '状态' },
+          { key: 'updatedAt', label: '更新时间' },
+        ]"
+        :rows="recent.map(r => ({...r, updatedAt: r.updatedAt ? new Date(r.updatedAt).toLocaleString() : '—'}))"
+        :loading="loading"
+        density="normal"
+      >
+        <template #cell:status="{ row }">
+          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                :class="row.status === 'published' ? 'bg-green-50 text-green-700 ring-1 ring-green-200' : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200'">
+            {{ row.status === 'published' ? '已发布' : '草稿' }}
+          </span>
+        </template>
+      </UiTable>
     </div>
   </div>
 </template>

@@ -1,1 +1,62 @@
 @import "tailwindcss";
+
+/* Design tokens */
+:root {
+  --brand-600: #4F46E5;
+  --brand-500: #6366F1;
+  --surface: #FFFFFF;       /* 卡片/面板 */
+  --surface-muted: #F5F7FB; /* 页面背景 */
+  --border: #EDEFF2;       /* 外框与分隔线 */
+  --text: #111827;         /* 主文本 */
+  --muted: #6B7280;        /* 次文本 */
+  --radius-card: 16px;
+  --radius-panel: 20px;
+}
+
+@layer base {
+  body {
+    background: var(--surface-muted);
+    color: var(--text);
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  /* 更贴近 Figma：白底 + 边框 + 轻阴影 */
+  .ui-card { @apply bg-white border shadow-sm; border-color: var(--border); border-radius: var(--radius-card); }
+  .ui-panel { @apply bg-white border shadow-sm; border-color: var(--border); border-radius: var(--radius-panel); }
+  .ui-badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+  .ui-btn { @apply inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors; }
+  .ui-btn-primary { @apply text-white; background: var(--brand-600); }
+  .ui-btn-primary:hover { @apply bg-indigo-500; }
+  .ui-btn-outline { @apply border; border-color: var(--border); }
+  .ui-btn-outline:hover { @apply bg-slate-50; }
+  .ui-btn-ghost { @apply text-slate-700 hover:bg-slate-50 rounded-lg; }
+
+  .ui-icon-btn { @apply inline-grid place-items-center h-8 w-8 rounded-xl border; border-color: var(--border); }
+  .ui-icon-btn:hover { @apply bg-slate-50; }
+
+  /* BankDash 表格 */
+  .bd-thead { background: var(--surface-muted); }
+  .bd-th { @apply text-xs font-medium uppercase tracking-wide; color: var(--muted); }
+  .bd-td { @apply text-sm; color: var(--text); height: 56px; }
+  .bd-row:hover { @apply bg-slate-50; }
+
+  /* KPI 卡片 */
+  .bd-kpi { @apply shadow-sm border bg-white flex items-center gap-4 p-4; border-color: var(--border); border-radius: var(--radius-card); }
+  .bd-kpi-icon { @apply h-10 w-10 rounded-lg grid place-items-center; background: #EEF2FF; color: #4F46E5; }
+  .bd-kpi-label { @apply text-xs uppercase tracking-wide; color: var(--muted); }
+  .bd-kpi-value { @apply text-2xl font-semibold; color: var(--text); }
+
+  /* 表单输入 */
+  .ui-input {
+    @apply w-full rounded-lg border px-3 py-2 text-sm outline-none placeholder:text-slate-400 transition shadow-sm;
+    border-color: var(--border);
+    background: var(--surface);
+  }
+  .ui-input:focus { @apply ring-2 ring-indigo-500 border-transparent; }
+}
+.edui-button.edui-for-xiumi-connect .edui-button-wrap .edui-button-body .edui-icon {
+    background-image: url("@/assets/xiumi-connect-icon.png") !important;
+    background-size: contain;
+}

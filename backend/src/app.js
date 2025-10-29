@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.js';
 import pageRoutes from './routes/pages.js';
+import ueditorRoutes from './routes/ueditor.js';
+import publicRoutes from './routes/public.js';
 import './config/database.js';
 
 dotenv.config();
@@ -24,12 +26,31 @@ app.use((req, res, next) => {
   next();
 });
 
+// 允许剪贴板权限（Permissions-Policy）
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'clipboard-read=(self), clipboard-write=(self)');
+  next();
+});
+
 app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+// 统一前缀下的健康检查（便于反向代理）
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/pages', pageRoutes);
+app.use('/api/ueditor', ueditorRoutes);
+app.use('/api/public', publicRoutes);
+// 静态文件：上传目录（统一前缀）
+import path from 'node:path';
+import expressStatic from 'express';
+// 新前缀：/api/uploads
+app.use('/api/uploads', expressStatic.static(path.resolve(process.cwd(), 'uploads')));
+// 兼容旧前缀：/uploads（可在确认无历史内容后移除）
+app.use('/uploads', expressStatic.static(path.resolve(process.cwd(), 'uploads')));
 
 // 404 处理
 app.use((req, res) => {

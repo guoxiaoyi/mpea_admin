@@ -2,11 +2,116 @@ import express from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { authMiddleware } from '../middleware/auth.js';
 import Page from '../models/Page.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
 // 所有页面管理接口需要认证
 router.use(authMiddleware);
+// 将外链图片下载到本地并重写内容中的 URL（主要处理秀米域名等）
+async function mirrorExternalImages(html) {
+  if (!html || typeof html !== 'string') return html;
+  const uploadsRoot = path.resolve(process.cwd(), 'uploads');
+  const now = new Date();
+  const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+  const saveDir = path.join(uploadsRoot, 'images', ymd);
+  fs.mkdirSync(saveDir, { recursive: true });
+
+  // 图片扩展名白名单
+  const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
+  
+  // 判断 URL 是否为图片
+  const isImageUrl = (url) => {
+    try {
+      const pathname = new URL(url).pathname.toLowerCase();
+      // 移除查询参数后判断扩展名
+      const pathWithoutQuery = pathname.split('?')[0];
+      return imageExts.some(ext => pathWithoutQuery.endsWith(ext));
+    } catch (_) {
+      return false;
+    }
+  };
+
+  // 判断是否为外链（非本地域名）
+  const isExternalUrl = (url) => {
+    try {
+      const u = new URL(url);
+      // 排除本地域名
+      return u.hostname && u.hostname !== 'localhost' && !u.hostname.startsWith('127.0.0.1');
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const urlToLocal = new Map();
+  const candidates = new Set();
+
+  // 1. 匹配 <img src="...">
+  const imgSrcRegex = /<img[^>]*?src=["'](https?:\/\/[^"'>]+)["'][^>]*?>/gi;
+  let m;
+  while ((m = imgSrcRegex.exec(html)) !== null) {
+    const url = m[1];
+    if (isImageUrl(url) && isExternalUrl(url)) {
+      candidates.add(url);
+    }
+  }
+
+  // 2. 匹配 background-image: url(...)
+  const bgImageRegex = /background-image\s*:\s*url\(['"]?(https?:\/\/[^'")]+)['"]?\)/gi;
+  while ((m = bgImageRegex.exec(html)) !== null) {
+    const url = m[1];
+    if (isImageUrl(url) && isExternalUrl(url)) {
+      candidates.add(url);
+    }
+  }
+
+  // 3. 匹配 background: url(...) （简写形式）
+  const bgRegex = /background\s*:[^;]*url\(['"]?(https?:\/\/[^'")]+)['"]?\)/gi;
+  while ((m = bgRegex.exec(html)) !== null) {
+    const url = m[1];
+    if (isImageUrl(url) && isExternalUrl(url)) {
+      candidates.add(url);
+    }
+  }
+
+  // 4. 匹配 style 属性中的其他可能包含图片的情况
+  const styleUrlRegex = /url\(['"]?(https?:\/\/[^'")]+)['"]?\)/gi;
+  while ((m = styleUrlRegex.exec(html)) !== null) {
+    const url = m[1];
+    if (isImageUrl(url) && isExternalUrl(url)) {
+      candidates.add(url);
+    }
+  }
+
+  // 下载并保存图片
+  for (const src of candidates) {
+    try {
+      const resp = await fetch(src);
+      if (!resp.ok) continue;
+      const ab = await resp.arrayBuffer();
+      const buf = Buffer.from(ab);
+      const extFromPath = path.extname(new URL(src).pathname.split('?')[0]) || '.jpg';
+      const safeExt = extFromPath.length <= 5 ? extFromPath : '.jpg';
+      const filename = `${Date.now()}-${Math.random().toString(36).slice(2,8)}${safeExt}`;
+      const full = path.join(saveDir, filename);
+      fs.writeFileSync(full, buf);
+      const localUrl = `/uploads/images/${ymd}/${filename}`;
+      urlToLocal.set(src, localUrl);
+    } catch (e) {
+      // 忽略单个资源失败，保留原链接
+      console.error(`下载图片失败: ${src}`, e.message);
+    }
+  }
+
+  if (urlToLocal.size === 0) return html;
+  let rewritten = html;
+  for (const [oldUrl, newUrl] of urlToLocal.entries()) {
+    const esc = oldUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    rewritten = rewritten.replace(new RegExp(esc, 'g'), newUrl);
+  }
+  return rewritten;
+}
 
 // 获取页面列表
 router.get(
@@ -70,6 +175,9 @@ router.post(
       return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
     }
     try {
+      if (req.body.content) {
+        req.body.content = await mirrorExternalImages(req.body.content);
+      }
       const exists = await Page.pathExists(req.body.path);
       if (exists) return res.status(409).json({ success: false, message: 'path 已存在' });
       const result = await Page.create(req.body);
@@ -97,6 +205,9 @@ router.put(
       return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
     }
     try {
+      if (req.body.content) {
+        req.body.content = await mirrorExternalImages(req.body.content);
+      }
       const exists = await Page.pathExists(req.body.path, req.params.id);
       if (exists) return res.status(409).json({ success: false, message: 'path 已存在' });
       await Page.update(req.params.id, req.body);
