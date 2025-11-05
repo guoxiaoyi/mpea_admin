@@ -6,6 +6,11 @@ const Layout = () => import('../views/Layout.vue')
 const Dashboard = () => import('../views/Dashboard.vue')
 const PageList = () => import('../views/page/PageList.vue')
 const PageForm = () => import('../views/page/PageForm.vue')
+const QwenImage = () => import('../views/ai/QwenImage.vue')
+const CaseList = () => import('../views/case/CaseList.vue')
+const CaseForm = () => import('../views/case/CaseForm.vue')
+const LecturerList = () => import('../views/lecturer/LecturerList.vue')
+const LecturerForm = () => import('../views/lecturer/LecturerForm.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +29,13 @@ const router = createRouter({
         { path: 'pages', name: 'pages', component: PageList, meta: { requiresAuth: true } },
         { path: 'pages/new', name: 'page-new', component: PageForm, meta: { requiresAuth: true } },
         { path: 'pages/:id', name: 'page-edit', component: PageForm, meta: { requiresAuth: true } },
+        { path: 'cases', name: 'cases', component: CaseList, meta: { requiresAuth: true } },
+        { path: 'cases/new', name: 'case-new', component: CaseForm, meta: { requiresAuth: true } },
+        { path: 'cases/:id', name: 'case-edit', component: CaseForm, meta: { requiresAuth: true } },
+        { path: 'lecturers', name: 'lecturers', component: LecturerList, meta: { requiresAuth: true } },
+        { path: 'lecturers/new', name: 'lecturer-new', component: LecturerForm, meta: { requiresAuth: true } },
+        { path: 'lecturers/:id', name: 'lecturer-edit', component: LecturerForm, meta: { requiresAuth: true } },
+        { path: 'ai-images', name: 'ai-images', component: QwenImage, meta: { requiresAuth: true } },
       ]
     },
     {

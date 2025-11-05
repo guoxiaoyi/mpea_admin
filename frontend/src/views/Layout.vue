@@ -42,6 +42,30 @@ async function onLogout() {
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 8h7M7 12h10M7 16h10"/></svg>
           <span>页面管理</span>
         </RouterLink>
+        <RouterLink
+          to="/admin/cases"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'cases' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7a3 3 0 013-3h10a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg>
+          <span>案例管理</span>
+        </RouterLink>
+        <RouterLink
+          to="/admin/lecturers"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'lecturers' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12a4 4 0 100-8 4 4 0 000 8z"/><path d="M4 20a8 8 0 0116 0"/></svg>
+          <span>讲师管理</span>
+        </RouterLink>
+        <RouterLink
+          to="/admin/ai-images"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'ai-images' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7a3 3 0 013-3h10a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7z"/><path d="M8 12l2.5 3 2-2.5L16 16"/><circle cx="9.5" cy="8.5" r="1.5"/></svg>
+          <span>AI 图片生成</span>
+        </RouterLink>
       </nav>
     </aside>
 

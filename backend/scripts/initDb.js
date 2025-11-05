@@ -43,6 +43,27 @@ CREATE TABLE IF NOT EXISTS news (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
 
+const createCases = `
+CREATE TABLE IF NOT EXISTS cases (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(200) NOT NULL,
+  professional_photo VARCHAR(255) NOT NULL,
+  child_photo VARCHAR(255) NOT NULL,
+  introduction TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
+const createLecturers = `
+CREATE TABLE IF NOT EXISTS lecturers (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL,
+  photo VARCHAR(255) NOT NULL,
+  introduction TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
 async function main() {
   let serverConn;
   let dbConn;
@@ -69,6 +90,8 @@ async function main() {
     await dbConn.execute(createAdmins);
     await dbConn.execute(createPages);
     await dbConn.execute(createNews);
+    await dbConn.execute(createCases);
+    await dbConn.execute(createLecturers);
     console.log('✓ 数据库表已创建/存在');
     process.exit(0);
   } catch (err) {

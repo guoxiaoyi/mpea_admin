@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.js';
 import pageRoutes from './routes/pages.js';
+import caseRoutes from './routes/cases.js';
+import lecturerRoutes from './routes/lecturers.js';
 import ueditorRoutes from './routes/ueditor.js';
 import publicRoutes from './routes/public.js';
 import './config/database.js';
@@ -42,6 +44,8 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/pages', pageRoutes);
+app.use('/api/cases', caseRoutes);
+app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/ueditor', ueditorRoutes);
 app.use('/api/public', publicRoutes);
 // 静态文件：上传目录（统一前缀）
