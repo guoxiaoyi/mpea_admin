@@ -147,18 +147,29 @@ router.get(
   }
 );
 
-// 公开：证书查询（根据证书编号）
+// 公开：证书查询（根据姓名和证书编号）
 router.get(
   '/certificates/search',
-  [query('certificateNo').isString().notEmpty().withMessage('证书编号不能为空')],
+  [
+    query('name').isString().notEmpty().withMessage('姓名不能为空'),
+    query('certificateNo').isString().notEmpty().withMessage('证书编号不能为空')
+  ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
     }
+    
     try {
-      const certificateNo = req.query.certificateNo.trim();
-      const certificate = await CertificateModel.findByCertificateNo(certificateNo);
+      const name = req.query.name.trim();
+      let certificateNo = req.query.certificateNo.trim();
+      
+      // 如果用户输入的不带 "No."，自动添加
+      if (!/^No\./i.test(certificateNo)) {
+        certificateNo = `N.${certificateNo}`;
+      }
+      
+      const certificate = await CertificateModel.findByNameAndCertificateNo(name, certificateNo);
       
       if (!certificate) {
         return res.json({ success: true, data: null, message: '未查询到该证书' });

@@ -93,6 +93,15 @@ class CertificateModel {
     return rows[0];
   }
 
+  // 根据姓名和证书编号查询（公共查询接口）
+  static async findByNameAndCertificateNo(name, certificateNo) {
+    const [rows] = await pool.execute(
+      'SELECT id, certificate_no AS certificateNo, name, cert_date AS certDate, status, created_at AS createdAt FROM certificates WHERE name = ? AND certificate_no = ? AND status = "enabled"',
+      [name, certificateNo]
+    );
+    return rows[0];
+  }
+
   // 根据ID查询
   static async findById(id) {
     const [rows] = await pool.execute(
