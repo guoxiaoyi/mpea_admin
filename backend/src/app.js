@@ -8,6 +8,7 @@ import caseRoutes from './routes/cases.js';
 import lecturerRoutes from './routes/lecturers.js';
 import ueditorRoutes from './routes/ueditor.js';
 import publicRoutes from './routes/public.js';
+import certificateRoutes from './routes/certificates.js';
 import './config/database.js';
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/cases', caseRoutes);
 app.use('/api/lecturers', lecturerRoutes);
 app.use('/api/ueditor', ueditorRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/certificates', certificateRoutes);
 // 静态文件：上传目录（统一前缀）
 import path from 'node:path';
 import expressStatic from 'express';

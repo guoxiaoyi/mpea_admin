@@ -4,6 +4,7 @@ import Page from '../models/Page.js';
 import News from '../models/News.js';
 import CaseModel from '../models/Case.js';
 import Lecturer from '../models/Lecturer.js';
+import CertificateModel from '../models/Certificate.js';
 
 const router = express.Router();
 
@@ -142,6 +143,31 @@ router.get(
       return res.json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: '获取失败' });
+    }
+  }
+);
+
+// 公开：证书查询（根据证书编号）
+router.get(
+  '/certificates/search',
+  [query('certificateNo').isString().notEmpty().withMessage('证书编号不能为空')],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+    try {
+      const certificateNo = req.query.certificateNo.trim();
+      const certificate = await CertificateModel.findByCertificateNo(certificateNo);
+      
+      if (!certificate) {
+        return res.json({ success: true, data: null, message: '未查询到该证书' });
+      }
+      
+      return res.json({ success: true, data: certificate });
+    } catch (error) {
+      console.error('查询证书失败:', error);
+      return res.status(500).json({ success: false, message: '查询失败' });
     }
   }
 );

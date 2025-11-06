@@ -64,6 +64,19 @@ CREATE TABLE IF NOT EXISTS lecturers (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
 
+const createCertificates = `
+CREATE TABLE IF NOT EXISTS certificates (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  certificate_no VARCHAR(100) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  cert_date VARCHAR(20) NOT NULL,
+  status ENUM('enabled', 'disabled') DEFAULT 'enabled',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_certificate_no (certificate_no),
+  INDEX idx_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
 async function main() {
   let serverConn;
   let dbConn;
@@ -92,6 +105,7 @@ async function main() {
     await dbConn.execute(createNews);
     await dbConn.execute(createCases);
     await dbConn.execute(createLecturers);
+    await dbConn.execute(createCertificates);
     console.log('✓ 数据库表已创建/存在');
     process.exit(0);
   } catch (err) {
