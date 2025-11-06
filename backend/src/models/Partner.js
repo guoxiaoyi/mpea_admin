@@ -68,10 +68,10 @@ class Partner {
     const limitNum = Math.min(100, Math.max(1, Number(limit) || 100));
     const offset = (pageNum - 1) * limitNum;
     
-    const query = 'SELECT id, title, image, link, sort_order AS sortOrder FROM partners WHERE status = "enabled" ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?';
+    const query = `SELECT id, title, image, link, sort_order AS sortOrder FROM partners WHERE status = "enabled" ORDER BY sort_order ASC, created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
     const countQuery = 'SELECT COUNT(*) as total FROM partners WHERE status = "enabled"';
 
-    const [rows] = await pool.execute(query, [limitNum, offset]);
+    const [rows] = await pool.execute(query);
     const [countResult] = await pool.execute(countQuery);
 
     return {
