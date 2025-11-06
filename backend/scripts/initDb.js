@@ -77,6 +77,20 @@ CREATE TABLE IF NOT EXISTS certificates (
   INDEX idx_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
 
+const createPartners = `
+CREATE TABLE IF NOT EXISTS partners (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(200) NOT NULL,
+  image VARCHAR(500) NOT NULL,
+  link VARCHAR(500),
+  sort_order INT DEFAULT 0,
+  status ENUM('enabled', 'disabled') DEFAULT 'enabled',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_sort_order (sort_order),
+  INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
 async function main() {
   let serverConn;
   let dbConn;
@@ -106,6 +120,7 @@ async function main() {
     await dbConn.execute(createCases);
     await dbConn.execute(createLecturers);
     await dbConn.execute(createCertificates);
+    await dbConn.execute(createPartners);
     console.log('✓ 数据库表已创建/存在');
     process.exit(0);
   } catch (err) {

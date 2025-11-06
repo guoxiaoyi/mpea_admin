@@ -13,6 +13,8 @@ const LecturerList = () => import('../views/lecturer/LecturerList.vue')
 const LecturerForm = () => import('../views/lecturer/LecturerForm.vue')
 const CertificateList = () => import('../views/certificate/CertificateList.vue')
 const CertificateSearch = () => import('../views/certificate/CertificateSearch.vue')
+const PartnerList = () => import('../views/partner/PartnerList.vue')
+const PartnerForm = () => import('../views/partner/PartnerForm.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +40,9 @@ const router = createRouter({
         { path: 'lecturers/new', name: 'lecturer-new', component: LecturerForm, meta: { requiresAuth: true } },
         { path: 'lecturers/:id', name: 'lecturer-edit', component: LecturerForm, meta: { requiresAuth: true } },
         { path: 'certificates', name: 'certificates', component: CertificateList, meta: { requiresAuth: true } },
+        { path: 'partners', name: 'partners', component: PartnerList, meta: { requiresAuth: true } },
+        { path: 'partners/new', name: 'partner-new', component: PartnerForm, meta: { requiresAuth: true } },
+        { path: 'partners/:id', name: 'partner-edit', component: PartnerForm, meta: { requiresAuth: true } },
         { path: 'ai-images', name: 'ai-images', component: QwenImage, meta: { requiresAuth: true } },
       ]
     },

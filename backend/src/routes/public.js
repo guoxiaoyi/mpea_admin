@@ -5,6 +5,7 @@ import News from '../models/News.js';
 import CaseModel from '../models/Case.js';
 import Lecturer from '../models/Lecturer.js';
 import CertificateModel from '../models/Certificate.js';
+import Partner from '../models/Partner.js';
 
 const router = express.Router();
 
@@ -179,6 +180,30 @@ router.get(
     } catch (error) {
       console.error('查询证书失败:', error);
       return res.status(500).json({ success: false, message: '查询失败' });
+    }
+  }
+);
+
+// 公开：合作伙伴列表
+router.get(
+  '/partners',
+  [
+    query('page').optional().toInt().isInt({ min: 1 }).withMessage('page 必须为正整数'),
+    query('limit').optional().toInt().isInt({ min: 1, max: 100 }).withMessage('limit 范围 1-100')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 100;
+    try {
+      const result = await Partner.findPublished(page, limit);
+      return res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('获取合作伙伴列表失败:', error);
+      return res.status(500).json({ success: false, message: '获取失败' });
     }
   }
 );
