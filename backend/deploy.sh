@@ -31,6 +31,7 @@ rsync -avz --progress \
     --exclude 'deploy.sh' \
     --exclude '*.log' \
     --exclude '.DS_Store' \
+    --exclude 'uploads' \
     ${LOCAL_PATH}/ ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/
 
 if [ $? -ne 0 ]; then
