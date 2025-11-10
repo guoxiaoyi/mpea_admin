@@ -56,7 +56,8 @@ router.post(
   [
     body('name').isString().notEmpty().withMessage('name 必填'),
     body('photo').isString().notEmpty().withMessage('photo 必填'),
-    body('introduction').optional().isString()
+    body('introduction').optional().isString(),
+    body('sortOrder').optional().isInt().withMessage('sortOrder 必须为整数')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -79,7 +80,8 @@ router.put(
     param('id').toInt().isInt().withMessage('id 必须为整数'),
     body('name').isString().notEmpty().withMessage('name 必填'),
     body('photo').isString().notEmpty().withMessage('photo 必填'),
-    body('introduction').optional().isString()
+    body('introduction').optional().isString(),
+    body('sortOrder').optional().isInt().withMessage('sortOrder 必须为整数')
   ],
   async (req, res) => {
     const errors = validationResult(req);

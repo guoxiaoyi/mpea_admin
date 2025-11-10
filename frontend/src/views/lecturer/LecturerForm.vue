@@ -10,7 +10,8 @@ const route = useRoute();
 const form = ref({
   name: '',
   photo: '',
-  introduction: ''
+  introduction: '',
+  sortOrder: 0
 });
 const isEdit = ref(false);
 const saving = ref(false);
@@ -39,7 +40,8 @@ async function onSubmit() {
     const payload = {
       name: form.value.name,
       photo: form.value.photo,
-      introduction: form.value.introduction || ''
+      introduction: form.value.introduction || '',
+      sortOrder: form.value.sortOrder ?? 0
     };
     if (isEdit.value) {
       await updateLecturer(route.params.id, payload);
@@ -80,7 +82,8 @@ onMounted(async () => {
         form.value = {
           name: d.name || '',
           photo: d.photo || '',
-          introduction: d.introduction || ''
+          introduction: d.introduction || '',
+          sortOrder: Number.isFinite(d.sortOrder) ? d.sortOrder : Number(d.sortOrder) || 0
         };
       }
     } catch (e) {
@@ -123,6 +126,11 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700">介绍</label>
           <textarea v-model="form.introduction" rows="6" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="讲师介绍" />
+        </div>
+
+        <div>
+          <label class="block text-base font-medium text-slate-700">排序</label>
+          <input v-model.number="form.sortOrder" type="number" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" placeholder="数字越小越靠前，默认为 0" />
         </div>
 
         <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>

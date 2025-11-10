@@ -33,7 +33,10 @@ async function load() {
   try {
     const res = await fetchLecturers({ page: page.value, limit: limit.value, keyword: keyword.value });
     if (res.success) {
-      list.value = res.data.data || [];
+      list.value = (res.data.data || []).map((item) => ({
+        ...item,
+        sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : Number(item.sortOrder) || 0,
+      }));
       total.value = res.data.total || 0;
     }
   } finally {
@@ -82,6 +85,7 @@ onMounted(load);
       </div>
       <UiTable
         :columns="[
+          { key: 'sortOrder', label: '排序', width: '80px' },
           { key: 'name', label: '姓名' },
           { key: 'photo', label: '照片' },
           { key: 'introduction', label: '介绍' },
@@ -91,6 +95,9 @@ onMounted(load);
         :loading="loading"
         density="normal"
       >
+        <template #cell:sortOrder="{ row }">
+          <span class="text-slate-700">{{ row.sortOrder ?? 0 }}</span>
+        </template>
         <template #cell:photo="{ row }">
           <div class="flex items-center gap-3">
             <img v-if="row.photo" :src="resolveImage(row.photo)" alt="讲师照片" class="h-12 w-12 object-cover rounded" />

@@ -1,20 +1,40 @@
 import pool from '../config/database.js';
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 100;
+
+function normalizePage(value, fallback = DEFAULT_PAGE) {
+  const page = Number.parseInt(value, 10);
+  return Number.isNaN(page) || page < 1 ? fallback : page;
+}
+
+function normalizeLimit(value, fallback = DEFAULT_LIMIT) {
+  const limit = Number.parseInt(value, 10);
+  if (Number.isNaN(limit)) return fallback;
+  return Math.min(MAX_LIMIT, Math.max(1, limit));
+}
+
+function normalizeSortOrder(value) {
+  const sortOrder = Number.parseInt(value, 10);
+  return Number.isNaN(sortOrder) ? 0 : sortOrder;
+}
+
 class Lecturer {
   static async create(data) {
-    const { name, photo, introduction } = data;
+    const sortOrder = normalizeSortOrder(data.sortOrder);
     const [result] = await pool.execute(
-      'INSERT INTO lecturers (name, photo, introduction) VALUES (?, ?, ?)',
-      [name, photo, introduction || '']
+      'INSERT INTO lecturers (name, photo, introduction, sort_order) VALUES (?, ?, ?, ?)',
+      [data.name, data.photo, data.introduction || '', sortOrder]
     );
     return result;
   }
 
-  static async findAll(page = 1, limit = 10, keyword = '') {
-    const pageNum = Number(page) || 1;
-    const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
+  static async findAll(page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, keyword = '') {
+    const pageNum = normalizePage(page);
+    const limitNum = normalizeLimit(limit);
     const offset = (pageNum - 1) * limitNum;
-    let query = 'SELECT id, name, photo, introduction, created_at, updated_at FROM lecturers';
+    let query = 'SELECT id, name, photo, introduction, sort_order AS sortOrder, created_at, updated_at FROM lecturers';
     let countQuery = 'SELECT COUNT(*) as total FROM lecturers';
     const params = [];
     const countParams = [];
@@ -27,7 +47,7 @@ class Lecturer {
       countParams.push(searchTerm);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
+    query += ` ORDER BY sort_order ASC, created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
 
     const [rows] = await pool.execute(query, params);
     const [countResult] = await pool.execute(countQuery, countParams);
@@ -42,17 +62,17 @@ class Lecturer {
 
   static async findById(id) {
     const [rows] = await pool.execute(
-      'SELECT id, name, photo, introduction, created_at, updated_at FROM lecturers WHERE id = ?',
+      'SELECT id, name, photo, introduction, sort_order AS sortOrder, created_at, updated_at FROM lecturers WHERE id = ?',
       [id]
     );
     return rows[0];
   }
 
   static async update(id, data) {
-    const { name, photo, introduction } = data;
+    const sortOrder = normalizeSortOrder(data.sortOrder);
     const [result] = await pool.execute(
-      'UPDATE lecturers SET name = ?, photo = ?, introduction = ? WHERE id = ?',
-      [name, photo, introduction || '', id]
+      'UPDATE lecturers SET name = ?, photo = ?, introduction = ?, sort_order = ? WHERE id = ?',
+      [data.name, data.photo, data.introduction || '', sortOrder, id]
     );
     return result;
   }
@@ -64,5 +84,4 @@ class Lecturer {
 }
 
 export default Lecturer;
-
 
