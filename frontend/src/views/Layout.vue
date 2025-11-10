@@ -75,6 +75,28 @@ async function onLogout() {
           <span>合作伙伴</span>
         </RouterLink>
         <RouterLink
+          to="/admin/map/continents"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'map-continents' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 3h18v18H3z" />
+            <path d="M9 3v18M3 9h18" />
+          </svg>
+          <span>地图洲管理</span>
+        </RouterLink>
+        <RouterLink
+          to="/admin/map/markers"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'map-markers' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2a6 6 0 016 6c0 4.5-6 12-6 12s-6-7.5-6-12a6 6 0 016-6z" />
+            <circle cx="12" cy="8" r="2" />
+          </svg>
+          <span>城市标记</span>
+        </RouterLink>
+        <RouterLink
           to="/admin/ai-images"
           class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
           aria-current="$route.name === 'ai-images' ? 'page' : undefined"

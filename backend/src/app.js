@@ -10,6 +10,7 @@ import ueditorRoutes from './routes/ueditor.js';
 import publicRoutes from './routes/public.js';
 import certificateRoutes from './routes/certificates.js';
 import partnerRoutes from './routes/partners.js';
+import mapRoutes from './routes/map.js';
 import './config/database.js';
 
 dotenv.config();
@@ -52,6 +53,7 @@ app.use('/api/ueditor', ueditorRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/partners', partnerRoutes);
+app.use('/api/map', mapRoutes);
 // 静态文件：上传目录（统一前缀）
 import path from 'node:path';
 import expressStatic from 'express';

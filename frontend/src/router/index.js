@@ -15,6 +15,10 @@ const CertificateList = () => import('../views/certificate/CertificateList.vue')
 const CertificateSearch = () => import('../views/certificate/CertificateSearch.vue')
 const PartnerList = () => import('../views/partner/PartnerList.vue')
 const PartnerForm = () => import('../views/partner/PartnerForm.vue')
+const MapContinentList = () => import('../views/map/ContinentList.vue')
+const MapContinentForm = () => import('../views/map/ContinentForm.vue')
+const MapMarkerList = () => import('../views/map/MarkerList.vue')
+const MapMarkerForm = () => import('../views/map/MarkerForm.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +47,12 @@ const router = createRouter({
         { path: 'partners', name: 'partners', component: PartnerList, meta: { requiresAuth: true } },
         { path: 'partners/new', name: 'partner-new', component: PartnerForm, meta: { requiresAuth: true } },
         { path: 'partners/:id', name: 'partner-edit', component: PartnerForm, meta: { requiresAuth: true } },
+        { path: 'map/continents', name: 'map-continents', component: MapContinentList, meta: { requiresAuth: true } },
+        { path: 'map/continents/new', name: 'map-continent-new', component: MapContinentForm, meta: { requiresAuth: true } },
+        { path: 'map/continents/:id', name: 'map-continent-edit', component: MapContinentForm, meta: { requiresAuth: true } },
+        { path: 'map/markers', name: 'map-markers', component: MapMarkerList, meta: { requiresAuth: true } },
+        { path: 'map/markers/new', name: 'map-marker-new', component: MapMarkerForm, meta: { requiresAuth: true } },
+        { path: 'map/markers/:id', name: 'map-marker-edit', component: MapMarkerForm, meta: { requiresAuth: true } },
         { path: 'ai-images', name: 'ai-images', component: QwenImage, meta: { requiresAuth: true } },
       ]
     },

@@ -6,6 +6,9 @@ import CaseModel from '../models/Case.js';
 import Lecturer from '../models/Lecturer.js';
 import CertificateModel from '../models/Certificate.js';
 import Partner from '../models/Partner.js';
+import MapContinent from '../models/MapContinent.js';
+import MapMarker from '../models/MapMarker.js';
+import locationCatalog from '../services/locationCatalog.js';
 
 const router = express.Router();
 
@@ -207,6 +210,91 @@ router.get(
     }
   }
 );
+
+// 公开：地图标点
+router.get('/map-markers', async (req, res) => {
+  try {
+    const data = await MapContinent.fetchForPublic();
+    return res.json({ success: true, data });
+  } catch (error) {
+    console.error('GET /api/public/map-markers error:', error);
+    return res.status(500).json({ success: false, message: '获取失败' });
+  }
+});
+
+// 公开：地图标点平铺列表
+router.post('/map-markers/flat', async (req, res) => {
+  try {
+    const markers = await MapMarker.findAllEnabledFlat();
+    return res.json({ success: true, data: markers });
+  } catch (error) {
+    console.error('POST /api/public/map-markers/flat error:', error);
+    return res.status(500).json({ success: false, message: '获取失败' });
+  }
+});
+
+// 公开：根据国家获取所在洲的图片
+router.post('/continent-photos', async (req, res) => {
+  const country = typeof req.body?.country === 'string' ? req.body.country.trim() : '';
+  const continentInput = typeof req.body?.continent === 'string' ? req.body.continent.trim() : '';
+
+  if (!country && !continentInput) {
+    return res.status(400).json({ success: false, message: 'country 或 continent 至少提供一个' });
+  }
+
+  try {
+    if (continentInput) {
+      const continentDetail = await MapContinent.findByNameOrCode(continentInput);
+      if (continentDetail) {
+        return res.json({
+          success: true,
+          data: {
+            continentId: continentDetail.id,
+            continentName: continentDetail.name,
+            continentCode: continentDetail.code,
+            photos: continentDetail.photos || []
+          }
+        });
+      }
+      if (!country) {
+        return res.status(404).json({ success: false, message: '未找到对应洲信息' });
+      }
+    }
+
+    if (!country) {
+      return res.status(404).json({ success: false, message: '未找到对应洲信息' });
+    }
+
+    const variants = new Set([country]);
+    const resolved = await locationCatalog.resolveCountryByName(country);
+    if (resolved) {
+      if (resolved.nameEn) variants.add(resolved.nameEn);
+      if (resolved.nameZh) variants.add(resolved.nameZh);
+    }
+
+    const continentMeta =
+      (await MapMarker.findContinentByCountryVariants(Array.from(variants))) ||
+      (await MapMarker.findContinentByCountry(country));
+    if (!continentMeta) {
+      return res.status(404).json({ success: false, message: '未找到对应洲信息' });
+    }
+
+    const continent = await MapContinent.findById(continentMeta.continentId);
+    const photos = continent?.photos || [];
+    return res.json({
+      success: true,
+      data: {
+        continentId: continentMeta.continentId,
+        continentName: continentMeta.continentName,
+        continentCode: continentMeta.continentCode,
+        photos
+      }
+    });
+  } catch (error) {
+    console.error('POST /api/public/continent-photos error:', error);
+    return res.status(500).json({ success: false, message: '获取失败' });
+  }
+});
 
 export default router;
 
