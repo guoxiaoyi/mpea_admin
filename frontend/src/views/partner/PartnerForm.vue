@@ -86,15 +86,17 @@ onMounted(async () => {
     isEdit.value = true;
     try {
       const res = await getPartner(id);
-      if (res.data?.success) {
-        const d = res.data.data || {};
+      if (res.success) {
+        const d = res.data || {};
         form.value = {
           title: d.title || '',
           image: d.image || '',
           link: d.link || '',
-          sortOrder: d.sortOrder || 0,
+          sortOrder: Number.isFinite(d.sortOrder) ? d.sortOrder : Number(d.sortOrder) || 0,
           status: d.status || 'enabled'
         };
+      } else {
+        errorMsg.value = res.message || '未能加载合作伙伴信息';
       }
     } catch (e) {
       errorMsg.value = e.response?.data?.message || '加载失败，但仍可编辑';

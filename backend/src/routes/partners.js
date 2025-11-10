@@ -1,8 +1,20 @@
 import express from 'express';
 import { body, param, query, validationResult } from 'express-validator';
+import { authMiddleware } from '../middleware/auth.js';
 import Partner from '../models/Partner.js';
 
 const router = express.Router();
+
+router.use(authMiddleware);
+
+const handleValidation = (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    return false;
+  }
+  return true;
+};
 
 // 获取合作伙伴列表（分页）
 router.get(
@@ -13,19 +25,15 @@ router.get(
     query('keyword').optional().isString()
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-    const keyword = req.query.keyword || '';
+    if (!handleValidation(req, res)) return;
+
+    const { page = 1, limit = 10, keyword = '' } = req.query;
     try {
       const result = await Partner.findAll(page, limit, keyword);
-      return res.json({ success: true, data: result });
+      res.json({ success: true, data: result });
     } catch (error) {
       console.error('获取合作伙伴列表失败:', error);
-      return res.status(500).json({ success: false, message: '获取失败' });
+      res.status(500).json({ success: false, message: '获取失败' });
     }
   }
 );
@@ -35,19 +43,18 @@ router.get(
   '/:id',
   [param('id').isInt().withMessage('ID 必须为整数')],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
+    if (!handleValidation(req, res)) return;
+
     try {
       const partner = await Partner.findById(req.params.id);
       if (!partner) {
-        return res.status(404).json({ success: false, message: '合作伙伴不存在' });
+        res.status(404).json({ success: false, message: '合作伙伴不存在' });
+        return;
       }
-      return res.json({ success: true, data: partner });
+      res.json({ success: true, data: partner });
     } catch (error) {
       console.error('获取合作伙伴失败:', error);
-      return res.status(500).json({ success: false, message: '获取失败' });
+      res.status(500).json({ success: false, message: '获取失败' });
     }
   }
 );
@@ -63,16 +70,14 @@ router.post(
     body('status').optional().isIn(['enabled', 'disabled']).withMessage('状态值无效')
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
+    if (!handleValidation(req, res)) return;
+
     try {
       const result = await Partner.create(req.body);
-      return res.status(201).json({ success: true, message: '创建成功', data: { id: result.insertId } });
+      res.json({ success: true, data: { id: result.insertId } });
     } catch (error) {
       console.error('创建合作伙伴失败:', error);
-      return res.status(500).json({ success: false, message: '创建失败' });
+      res.status(500).json({ success: false, message: '创建失败' });
     }
   }
 );
@@ -89,20 +94,19 @@ router.put(
     body('status').optional().isIn(['enabled', 'disabled']).withMessage('状态值无效')
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
+    if (!handleValidation(req, res)) return;
+
     try {
       const partner = await Partner.findById(req.params.id);
       if (!partner) {
-        return res.status(404).json({ success: false, message: '合作伙伴不存在' });
+        res.status(404).json({ success: false, message: '合作伙伴不存在' });
+        return;
       }
       await Partner.update(req.params.id, req.body);
-      return res.json({ success: true, message: '更新成功' });
+      res.json({ success: true });
     } catch (error) {
       console.error('更新合作伙伴失败:', error);
-      return res.status(500).json({ success: false, message: '更新失败' });
+      res.status(500).json({ success: false, message: '更新失败' });
     }
   }
 );
@@ -112,20 +116,19 @@ router.delete(
   '/:id',
   [param('id').isInt().withMessage('ID 必须为整数')],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
+    if (!handleValidation(req, res)) return;
+
     try {
       const partner = await Partner.findById(req.params.id);
       if (!partner) {
-        return res.status(404).json({ success: false, message: '合作伙伴不存在' });
+        res.status(404).json({ success: false, message: '合作伙伴不存在' });
+        return;
       }
       await Partner.delete(req.params.id);
-      return res.json({ success: true, message: '删除成功' });
+      res.json({ success: true });
     } catch (error) {
       console.error('删除合作伙伴失败:', error);
-      return res.status(500).json({ success: false, message: '删除失败' });
+      res.status(500).json({ success: false, message: '删除失败' });
     }
   }
 );
@@ -135,16 +138,14 @@ router.post(
   '/batch-delete',
   [body('ids').isArray({ min: 1 }).withMessage('ids 必须为非空数组')],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
+    if (!handleValidation(req, res)) return;
+
     try {
       const result = await Partner.batchDelete(req.body.ids);
-      return res.json({ success: true, message: '批量删除成功', data: { count: result.affectedRows } });
+      res.json({ success: true, data: { count: result.affectedRows } });
     } catch (error) {
       console.error('批量删除合作伙伴失败:', error);
-      return res.status(500).json({ success: false, message: '批量删除失败' });
+      res.status(500).json({ success: false, message: '批量删除失败' });
     }
   }
 );
@@ -157,16 +158,14 @@ router.patch(
     body('sortOrder').isInt().withMessage('排序必须为整数')
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
-    }
+    if (!handleValidation(req, res)) return;
+
     try {
       await Partner.updateSortOrder(req.params.id, req.body.sortOrder);
-      return res.json({ success: true, message: '更新排序成功' });
+      res.json({ success: true });
     } catch (error) {
       console.error('更新排序失败:', error);
-      return res.status(500).json({ success: false, message: '更新排序失败' });
+      res.status(500).json({ success: false, message: '更新排序失败' });
     }
   }
 );
