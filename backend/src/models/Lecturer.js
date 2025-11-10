@@ -24,8 +24,8 @@ class Lecturer {
   static async create(data) {
     const sortOrder = normalizeSortOrder(data.sortOrder);
     const [result] = await pool.execute(
-      'INSERT INTO lecturers (name, photo, introduction, sort_order) VALUES (?, ?, ?, ?)',
-      [data.name, data.photo, data.introduction || '', sortOrder]
+      'INSERT INTO lecturers (name, name_en, photo, introduction, introduction_en, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+      [data.name, data.nameEn || '', data.photo, data.introduction || '', data.introductionEn || '', sortOrder]
     );
     return result;
   }
@@ -34,17 +34,17 @@ class Lecturer {
     const pageNum = normalizePage(page);
     const limitNum = normalizeLimit(limit);
     const offset = (pageNum - 1) * limitNum;
-    let query = 'SELECT id, name, photo, introduction, sort_order AS sortOrder, created_at, updated_at FROM lecturers';
+    let query = 'SELECT id, name, name_en AS nameEn, photo, introduction, introduction_en AS introductionEn, sort_order AS sortOrder, created_at, updated_at FROM lecturers';
     let countQuery = 'SELECT COUNT(*) as total FROM lecturers';
     const params = [];
     const countParams = [];
 
     if (keyword) {
-      query += ' WHERE name LIKE ?';
-      countQuery += ' WHERE name LIKE ?';
+      query += ' WHERE name LIKE ? OR name_en LIKE ?';
+      countQuery += ' WHERE name LIKE ? OR name_en LIKE ?';
       const searchTerm = `%${keyword}%`;
-      params.push(searchTerm);
-      countParams.push(searchTerm);
+      params.push(searchTerm, searchTerm);
+      countParams.push(searchTerm, searchTerm);
     }
 
     query += ` ORDER BY sort_order ASC, created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
@@ -62,7 +62,7 @@ class Lecturer {
 
   static async findById(id) {
     const [rows] = await pool.execute(
-      'SELECT id, name, photo, introduction, sort_order AS sortOrder, created_at, updated_at FROM lecturers WHERE id = ?',
+      'SELECT id, name, name_en AS nameEn, photo, introduction, introduction_en AS introductionEn, sort_order AS sortOrder, created_at, updated_at FROM lecturers WHERE id = ?',
       [id]
     );
     return rows[0];
@@ -71,8 +71,8 @@ class Lecturer {
   static async update(id, data) {
     const sortOrder = normalizeSortOrder(data.sortOrder);
     const [result] = await pool.execute(
-      'UPDATE lecturers SET name = ?, photo = ?, introduction = ?, sort_order = ? WHERE id = ?',
-      [data.name, data.photo, data.introduction || '', sortOrder, id]
+      'UPDATE lecturers SET name = ?, name_en = ?, photo = ?, introduction = ?, introduction_en = ?, sort_order = ? WHERE id = ?',
+      [data.name, data.nameEn || '', data.photo, data.introduction || '', data.introductionEn || '', sortOrder, id]
     );
     return result;
   }

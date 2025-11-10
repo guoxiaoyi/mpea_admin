@@ -87,8 +87,10 @@ onMounted(load);
         :columns="[
           { key: 'sortOrder', label: '排序', width: '80px' },
           { key: 'name', label: '姓名' },
+          { key: 'nameEn', label: '英文姓名' },
           { key: 'photo', label: '照片' },
           { key: 'introduction', label: '介绍' },
+          { key: 'introductionEn', label: '英文介绍' },
           { key: 'actions', label: '操作', align: 'right', width: '140px' },
         ]"
         :rows="list"
@@ -106,6 +108,9 @@ onMounted(load);
         </template>
         <template #cell:introduction="{ row }">
           <span class="text-slate-600">{{ truncate(row.introduction) }}</span>
+        </template>
+        <template #cell:introductionEn="{ row }">
+          <span class="text-slate-600">{{ truncate(row.introductionEn) }}</span>
         </template>
         <template #cell:actions="{ row }">
           <div class="flex justify-end gap-2">

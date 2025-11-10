@@ -15,6 +15,8 @@ const CertificateList = () => import('../views/certificate/CertificateList.vue')
 const CertificateSearch = () => import('../views/certificate/CertificateSearch.vue')
 const PartnerList = () => import('../views/partner/PartnerList.vue')
 const PartnerForm = () => import('../views/partner/PartnerForm.vue')
+const KindergartenList = () => import('../views/kindergarten/KindergartenList.vue')
+const KindergartenForm = () => import('../views/kindergarten/KindergartenForm.vue')
 const MapContinentList = () => import('../views/map/ContinentList.vue')
 const MapContinentForm = () => import('../views/map/ContinentForm.vue')
 const MapMarkerList = () => import('../views/map/MarkerList.vue')
@@ -47,6 +49,9 @@ const router = createRouter({
         { path: 'partners', name: 'partners', component: PartnerList, meta: { requiresAuth: true } },
         { path: 'partners/new', name: 'partner-new', component: PartnerForm, meta: { requiresAuth: true } },
         { path: 'partners/:id', name: 'partner-edit', component: PartnerForm, meta: { requiresAuth: true } },
+        { path: 'kindergartens', name: 'kindergartens', component: KindergartenList, meta: { requiresAuth: true } },
+        { path: 'kindergartens/new', name: 'kindergarten-new', component: KindergartenForm, meta: { requiresAuth: true } },
+        { path: 'kindergartens/:id', name: 'kindergarten-edit', component: KindergartenForm, meta: { requiresAuth: true } },
         { path: 'map/continents', name: 'map-continents', component: MapContinentList, meta: { requiresAuth: true } },
         { path: 'map/continents/new', name: 'map-continent-new', component: MapContinentForm, meta: { requiresAuth: true } },
         { path: 'map/continents/:id', name: 'map-continent-edit', component: MapContinentForm, meta: { requiresAuth: true } },

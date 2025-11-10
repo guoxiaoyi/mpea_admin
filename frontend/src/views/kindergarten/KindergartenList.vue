@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { fetchCases, deleteCase } from '@/api/case';
+import { fetchKindergartens, deleteKindergarten } from '@/api/kindergarten';
 import UiTable from '@/components/UiTable.vue';
 
 const router = useRouter();
@@ -10,6 +10,7 @@ const total = ref(0);
 const page = ref(1);
 const limit = ref(10);
 const keyword = ref('');
+const status = ref('');
 const loading = ref(false);
 
 const apiBase = (import.meta.env.VITE_API_BASE || window.location.origin).replace(/\/$/, '');
@@ -31,7 +32,13 @@ function truncate(text, max = 60) {
 async function load() {
   loading.value = true;
   try {
-    const res = await fetchCases({ page: page.value, limit: limit.value, keyword: keyword.value });
+    const params = {
+      page: page.value,
+      limit: limit.value,
+      keyword: keyword.value || undefined,
+      status: status.value || undefined
+    };
+    const res = await fetchKindergartens(params);
     if (res.success) {
       list.value = res.data.data || [];
       total.value = res.data.total || 0;
@@ -42,17 +49,22 @@ async function load() {
 }
 
 function openCreate() {
-  router.push('/admin/cases/new');
+  router.push('/admin/kindergartens/new');
 }
 
 function openEdit(row) {
-  router.push(`/admin/cases/${row.id}`);
+  router.push(`/admin/kindergartens/${row.id}`);
 }
 
 async function onDelete(id) {
-  if (!confirm('确定删除该案例吗？')) return;
-  await deleteCase(id);
+  if (!confirm('确定删除该幼儿园吗？')) return;
+  await deleteKindergarten(id);
   await load();
+}
+
+function onSearch() {
+  page.value = 1;
+  load();
 }
 
 onMounted(load);
@@ -62,55 +74,66 @@ onMounted(load);
   <div class="space-y-4">
     <div class="flex items-end justify-between">
       <div>
-        <div class="text-lg font-semibold text-slate-900">MPEA 案例</div>
-        <p class="text-sm text-slate-500 mt-1">维护案例信息，包括职业照与孩子照</p>
+        <div class="text-lg font-semibold text-slate-900">推荐幼儿园</div>
+        <p class="text-sm text-slate-500 mt-1">维护推荐幼儿园信息，支持中英双语字段</p>
       </div>
-      <button class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500" @click="openCreate">新增案例</button>
+      <button class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500" @click="openCreate">新增幼儿园</button>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <div class="flex items-center gap-2 w-80 rounded-full border px-3 py-1.5" style="border-color: var(--border); background: var(--surface)">
         <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input v-model="keyword" type="text" placeholder="搜索标题" class="w-full bg-transparent outline-none" />
+        <input v-model="keyword" type="text" placeholder="搜索名称或地址" class="w-full bg-transparent outline-none" />
       </div>
-      <button class="ui-btn-primary" @click="() => { page.value = 1; load(); }">搜索</button>
+      <select v-model="status" class="rounded-lg border px-3 py-1.5 text-sm text-slate-600" style="border-color: var(--border); background: var(--surface)">
+        <option value="">全部状态</option>
+        <option value="enabled">启用</option>
+        <option value="disabled">停用</option>
+      </select>
+      <button class="ui-btn-primary" @click="onSearch">搜索</button>
     </div>
 
     <div class="ui-panel border-none p-0 overflow-hidden">
       <div class="px-6 py-4 border-b" style="border-color: var(--border)">
-        <div class="font-medium text-slate-900">案例列表（共 {{ total }} 条）</div>
+        <div class="font-medium text-slate-900">幼儿园列表（共 {{ total }} 所）</div>
       </div>
       <UiTable
         :columns="[
-          { key: 'title', label: '标题' },
-          { key: 'titleEn', label: '英文标题' },
-          { key: 'professionalPhoto', label: '职业照' },
-          { key: 'childPhoto', label: '孩子照' },
-          { key: 'introduction', label: '介绍' },
-          { key: 'introductionEn', label: '英文介绍' },
+          { key: 'sortOrder', label: '排序', width: '80px' },
+          { key: 'name', label: '中文名称' },
+          { key: 'nameEn', label: '英文名称' },
+          { key: 'logo', label: 'Logo' },
+          { key: 'address', label: '中文地址' },
+          { key: 'addressEn', label: '英文地址' },
+          { key: 'status', label: '状态', width: '90px' },
           { key: 'actions', label: '操作', align: 'right', width: '140px' },
         ]"
         :rows="list"
         :loading="loading"
         density="normal"
       >
-        <template #cell:professionalPhoto="{ row }">
+        <template #cell:sortOrder="{ row }">
+          <span class="text-slate-700">{{ row.sortOrder ?? 0 }}</span>
+        </template>
+        <template #cell:logo="{ row }">
           <div class="flex items-center gap-3">
-            <img v-if="row.professionalPhoto" :src="resolveImage(row.professionalPhoto)" alt="职业照" class="h-12 w-12 object-cover rounded" />
+            <img v-if="row.logo" :src="resolveImage(row.logo)" alt="logo" class="h-12 w-12 object-cover rounded border" />
             <span v-else class="text-slate-400">-</span>
           </div>
         </template>
-        <template #cell:childPhoto="{ row }">
-          <div class="flex items-center gap-3">
-            <img v-if="row.childPhoto" :src="resolveImage(row.childPhoto)" alt="孩子照" class="h-12 w-12 object-cover rounded" />
-            <span v-else class="text-slate-400">-</span>
-          </div>
+        <template #cell:address="{ row }">
+          <span class="text-slate-600">{{ truncate(row.address, 40) }}</span>
         </template>
-        <template #cell:introduction="{ row }">
-          <span class="text-slate-600">{{ truncate(row.introduction) }}</span>
+        <template #cell:addressEn="{ row }">
+          <span class="text-slate-600">{{ truncate(row.addressEn, 40) }}</span>
         </template>
-        <template #cell:introductionEn="{ row }">
-          <span class="text-slate-600">{{ truncate(row.introductionEn) }}</span>
+        <template #cell:status="{ row }">
+          <span
+            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+            :class="row.status === 'enabled' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'"
+          >
+            {{ row.status === 'enabled' ? '启用' : '停用' }}
+          </span>
         </template>
         <template #cell:actions="{ row }">
           <div class="flex justify-end gap-2">

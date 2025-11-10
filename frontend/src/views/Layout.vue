@@ -75,6 +75,17 @@ async function onLogout() {
           <span>合作伙伴</span>
         </RouterLink>
         <RouterLink
+          to="/admin/kindergartens"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'kindergartens' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 21V9l8-6 8 6v12" />
+            <path d="M9 21V12h6v9" />
+          </svg>
+          <span>推荐幼儿园</span>
+        </RouterLink>
+        <RouterLink
           to="/admin/map/continents"
           class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
           aria-current="$route.name === 'map-continents' ? 'page' : undefined"

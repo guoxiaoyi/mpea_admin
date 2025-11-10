@@ -55,9 +55,11 @@ router.post(
   '/',
   [
     body('title').isString().notEmpty().withMessage('title 必填'),
+    body('titleEn').optional().isString().withMessage('titleEn 必须为字符串'),
     body('professionalPhoto').isString().notEmpty().withMessage('professionalPhoto 必填'),
     body('childPhoto').isString().notEmpty().withMessage('childPhoto 必填'),
-    body('introduction').optional().isString()
+    body('introduction').optional().isString(),
+    body('introductionEn').optional().isString().withMessage('introductionEn 必须为字符串')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -79,9 +81,11 @@ router.put(
   [
     param('id').toInt().isInt().withMessage('id 必须为整数'),
     body('title').isString().notEmpty().withMessage('title 必填'),
+    body('titleEn').optional().isString().withMessage('titleEn 必须为字符串'),
     body('professionalPhoto').isString().notEmpty().withMessage('professionalPhoto 必填'),
     body('childPhoto').isString().notEmpty().withMessage('childPhoto 必填'),
-    body('introduction').optional().isString()
+    body('introduction').optional().isString(),
+    body('introductionEn').optional().isString().withMessage('introductionEn 必须为字符串')
   ],
   async (req, res) => {
     const errors = validationResult(req);

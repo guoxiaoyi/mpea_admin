@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import request from '@/api/request'
 
 const levelTabs = ['一级', '二级', '三级']
 const activeLevel = ref('一级')
@@ -16,10 +17,10 @@ function setActive(level) {
 
 // Language toggle
 const lang = ref('zh') // 'zh' | 'en'
-const anchors = ['#home', '#about', '#features', '#cert', '#join']
+const anchors = ['#home', '#about', '#features', '#kindergartens', '#cert', '#join']
 const navLabels = {
-  zh: ['首页', '简介', '业务与优势', '认证与合作', '加入MPEA'],
-  en: ['Home', 'About', 'Services & Advantages', 'Certification & Partners', 'Join MPEA'],
+  zh: ['首页', '简介', '业务与优势', '推荐幼儿园', '认证与合作', '加入MPEA'],
+  en: ['Home', 'About', 'Services & Advantages', 'Recommended Kindergartens', 'Certification & Partners', 'Join MPEA'],
 }
 const heroTitle = {
   zh: 'MPEA蒙台梭利家长教育协会',
@@ -32,6 +33,37 @@ const heroSubtitle = {
 function toggleLang() {
   lang.value = lang.value === 'zh' ? 'en' : 'zh'
 }
+
+const kindergartens = ref([])
+const kindergartenLoading = ref(false)
+const apiBase = (import.meta.env.VITE_API_BASE || window.location.origin).replace(/\/$/, '')
+
+function resolveImage(url) {
+  if (!url) return ''
+  try {
+    return new URL(url, `${apiBase}/`).href
+  } catch (e) {
+    return url
+  }
+}
+
+async function loadKindergartens() {
+  kindergartenLoading.value = true
+  try {
+    const res = await request.get('/api/public/kindergartens', { params: { limit: 6 } })
+    if (res.success) {
+      kindergartens.value = Array.isArray(res.data) ? res.data : []
+    }
+  } catch (e) {
+    kindergartens.value = []
+  } finally {
+    kindergartenLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadKindergartens()
+})
 </script>
 
 <template>
@@ -174,6 +206,72 @@ function toggleLang() {
             <div class="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 grid place-content-center">🧑‍🏫</div>
             <h3 class="mt-4 font-semibold text-slate-900">专业师资与认证</h3>
             <p class="mt-2 text-sm text-slate-600">分级讲师与MPC认证支持，保障教学质量。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommended Kindergartens -->
+    <section id="kindergartens" class="py-16 sm:py-24 bg-slate-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">
+              {{ lang === 'zh' ? '推荐幼儿园' : 'Recommended Kindergartens' }}
+            </h2>
+            <p class="mt-2 text-slate-600">
+              {{
+                lang === 'zh'
+                  ? '甄选优质蒙台梭利幼儿园，支持双语信息呈现'
+                  : 'Selected Montessori kindergartens with bilingual information'
+              }}
+            </p>
+          </div>
+          <a href="#join" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white text-sm hover:bg-indigo-500">
+            {{ lang === 'zh' ? '申请合作' : 'Apply to Partner' }}
+            <span aria-hidden>→</span>
+          </a>
+        </div>
+
+        <div class="mt-10">
+          <div v-if="kindergartenLoading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-for="n in 3" :key="n" class="rounded-xl bg-white p-6 ring-1 ring-slate-200 animate-pulse">
+              <div class="h-12 w-12 rounded-full bg-slate-200"></div>
+              <div class="mt-6 h-4 w-2/3 rounded bg-slate-200"></div>
+              <div class="mt-3 h-3 w-5/6 rounded bg-slate-200"></div>
+              <div class="mt-8 h-3 w-3/4 rounded bg-slate-200"></div>
+            </div>
+          </div>
+          <div v-else-if="kindergartens.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article
+              v-for="item in kindergartens"
+              :key="item.id"
+              class="rounded-xl bg-white p-6 ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <div class="flex items-center gap-4">
+                <img v-if="item.logo" :src="resolveImage(item.logo)" :alt="item.name" class="h-14 w-14 rounded-full object-cover ring-1 ring-slate-200" />
+                <div v-else class="h-14 w-14 rounded-full bg-slate-100 ring-1 ring-slate-200 grid place-content-center text-slate-400 text-sm">
+                  LOGO
+                </div>
+                <div>
+                  <p class="text-base font-semibold text-slate-900">{{ item.name }}</p>
+                  <p class="text-sm text-slate-500">{{ item.nameEn }}</p>
+                </div>
+              </div>
+              <div class="mt-6 space-y-2 text-sm leading-6 text-slate-600">
+                <p>
+                  <span class="font-medium text-slate-900">{{ lang === 'zh' ? '地址（中文）' : 'Address (CN)' }}：</span>
+                  {{ item.address }}
+                </p>
+                <p>
+                  <span class="font-medium text-slate-900">{{ lang === 'zh' ? '地址（英文）' : 'Address (EN)' }}：</span>
+                  {{ item.addressEn }}
+                </p>
+              </div>
+            </article>
+          </div>
+          <div v-else class="rounded-xl bg-white p-10 text-center text-slate-500 ring-1 ring-slate-200">
+            {{ lang === 'zh' ? '暂无推荐幼儿园，敬请期待。' : 'No recommended kindergartens yet. Stay tuned.' }}
           </div>
         </div>
       </div>

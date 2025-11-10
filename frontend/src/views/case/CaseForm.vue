@@ -9,9 +9,11 @@ const route = useRoute();
 
 const form = ref({
   title: '',
+  titleEn: '',
   professionalPhoto: '',
   childPhoto: '',
-  introduction: ''
+  introduction: '',
+  introductionEn: ''
 });
 const isEdit = ref(false);
 const saving = ref(false);
@@ -39,9 +41,11 @@ async function onSubmit() {
   try {
     const payload = {
       title: form.value.title,
+      titleEn: form.value.titleEn || '',
       professionalPhoto: form.value.professionalPhoto,
       childPhoto: form.value.childPhoto,
-      introduction: form.value.introduction || ''
+      introduction: form.value.introduction || '',
+      introductionEn: form.value.introductionEn || ''
     };
     if (isEdit.value) {
       await updateCase(route.params.id, payload);
@@ -81,9 +85,11 @@ onMounted(async () => {
         const d = res.data || {};
         form.value = {
           title: d.title || '',
+          titleEn: d.titleEn || '',
           professionalPhoto: d.professionalPhoto || '',
           childPhoto: d.childPhoto || '',
-          introduction: d.introduction || ''
+          introduction: d.introduction || '',
+          introductionEn: d.introductionEn || ''
         };
       }
     } catch (e) {
@@ -108,6 +114,10 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700">标题</label>
           <input v-model="form.title" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" />
+        </div>
+        <div>
+          <label class="block text-base font-medium text-slate-700">英文标题</label>
+          <input v-model="form.titleEn" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" placeholder="Optional English title" />
         </div>
 
         <div class="grid gap-2">
@@ -139,6 +149,10 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700">介绍</label>
           <textarea v-model="form.introduction" rows="6" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="案例介绍" />
+        </div>
+        <div>
+          <label class="block text-base font-medium text-slate-700">英文介绍</label>
+          <textarea v-model="form.introductionEn" rows="6" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Case introduction in English" />
         </div>
 
         <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>

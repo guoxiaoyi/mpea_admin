@@ -6,6 +6,7 @@ import CaseModel from '../models/Case.js';
 import Lecturer from '../models/Lecturer.js';
 import CertificateModel from '../models/Certificate.js';
 import Partner from '../models/Partner.js';
+import Kindergarten from '../models/Kindergarten.js';
 import MapContinent from '../models/MapContinent.js';
 import MapMarker from '../models/MapMarker.js';
 import locationCatalog from '../services/locationCatalog.js';
@@ -206,6 +207,28 @@ router.get(
       return res.json({ success: true, data: result });
     } catch (error) {
       console.error('获取合作伙伴列表失败:', error);
+      return res.status(500).json({ success: false, message: '获取失败' });
+    }
+  }
+);
+
+// 公开：推荐幼儿园列表
+router.get(
+  '/kindergartens',
+  [
+    query('limit').optional().toInt().isInt({ min: 1, max: 100 }).withMessage('limit 范围 1-100')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+    const limit = req.query.limit || 12;
+    try {
+      const data = await Kindergarten.findPublished(limit);
+      return res.json({ success: true, data });
+    } catch (error) {
+      console.error('GET /api/public/kindergartens error:', error);
       return res.status(500).json({ success: false, message: '获取失败' });
     }
   }

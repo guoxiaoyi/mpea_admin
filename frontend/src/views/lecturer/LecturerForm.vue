@@ -9,8 +9,10 @@ const route = useRoute();
 
 const form = ref({
   name: '',
+  nameEn: '',
   photo: '',
   introduction: '',
+  introductionEn: '',
   sortOrder: 0
 });
 const isEdit = ref(false);
@@ -39,8 +41,10 @@ async function onSubmit() {
   try {
     const payload = {
       name: form.value.name,
+      nameEn: form.value.nameEn || '',
       photo: form.value.photo,
       introduction: form.value.introduction || '',
+      introductionEn: form.value.introductionEn || '',
       sortOrder: form.value.sortOrder ?? 0
     };
     if (isEdit.value) {
@@ -81,8 +85,10 @@ onMounted(async () => {
         const d = res.data || {};
         form.value = {
           name: d.name || '',
+          nameEn: d.nameEn || '',
           photo: d.photo || '',
           introduction: d.introduction || '',
+          introductionEn: d.introductionEn || '',
           sortOrder: Number.isFinite(d.sortOrder) ? d.sortOrder : Number(d.sortOrder) || 0
         };
       }
@@ -109,6 +115,10 @@ onMounted(async () => {
           <label class="block text-base font-medium text-slate-700">姓名</label>
           <input v-model="form.name" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" />
         </div>
+        <div>
+          <label class="block text-base font-medium text-slate-700">英文姓名</label>
+          <input v-model="form.nameEn" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" placeholder="Optional English name" />
+        </div>
 
         <div class="grid gap-2">
           <label class="block text-base font-medium text-slate-700">照片</label>
@@ -126,6 +136,10 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700">介绍</label>
           <textarea v-model="form.introduction" rows="6" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="讲师介绍" />
+        </div>
+        <div>
+          <label class="block text-base font-medium text-slate-700">英文介绍</label>
+          <textarea v-model="form.introductionEn" rows="6" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Lecturer introduction in English" />
         </div>
 
         <div>
