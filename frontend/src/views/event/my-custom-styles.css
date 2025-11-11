@@ -1,0 +1,35 @@
+:root {
+    /* Input */
+    --vpick--input-font: var(--vpick--font-default);
+    --vpick--input-height: calc(var(--spacing) * 12);
+    --vpick--input-padding: 8px 12px;
+    --vpick--input-bg-color: var(--vpick--color-white);
+    --vpick--input-color: var(--vpick--color-text-primary);
+    --vpick--input-border-width: 1px;
+    --vpick--input-border-color: var(--color-slate-300);
+    --vpick--input-border-radius: 8px;
+    --vpick--input-placeholder-color: var(--vpick--color-border-base);
+    --vpick--input-icon-size: 24px;
+    --vpick--input-icon-color: var(--vpick--color-text-regular);
+    --vpick--input-icon-hover-color: var(--vpick--color-primary);
+
+    --vpick--input-readonly-bg-color: var(--vpick--input-bg-color);
+    --vpick--input-readonly-color: var(--vpick--input-color);
+    --vpick--input-readonly-border-color: var(--vpick--input-border-color);
+
+    --vpick--input-hover-bg-color: var(--vpick--input-bg-color);
+    --vpick--input-hover-color: var(--vpick--input-color);
+    --vpick--input-hover-border-color: var(--vpick--color-text-secondary);
+
+    --vpick--input-focus-bg-color: var(--vpick--input-bg-color);
+    --vpick--input-focus-color: var(--vpick--input-color);
+    --vpick--input-focus-border-color: var(--vpick--color-primary);
+
+    --vpick--input-disabled-bg-color: var(--vpick--color-background-text-primary);
+    --vpick--input-disabled-color: var(--vpick--input-color);
+    --vpick--input-disabled-border-color: var(--vpick--color-placeholder);
+
+    --vpick--input-invalid-bg-color: var(--vpick--input-bg-color);
+    --vpick--input-invalid-color: var(--vpick--color-error);
+    --vpick--input-invalid-border-color: var(--vpick--color-error);
+}

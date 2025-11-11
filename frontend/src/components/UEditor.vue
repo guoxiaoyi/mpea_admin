@@ -17,15 +17,53 @@ const mountEl = ref(null);
 let editor;
 let containerId = '';
 
+const scriptPromises = new Map();
+
 function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
+  if (scriptPromises.has(src)) {
+    return scriptPromises.get(src);
+  }
+
+  const existing = document.querySelector(`script[src="${src}"]`);
+
+  const promise = new Promise((resolve, reject) => {
+    const target = existing || document.createElement('script');
+
+    if (existing && existing.getAttribute('data-loaded') === 'true') {
+      resolve();
+      return;
+    }
+
+    const cleanup = () => {
+      target.removeEventListener('load', onLoad);
+      target.removeEventListener('error', onError);
+    };
+
+    const onLoad = () => {
+      target.setAttribute('data-loaded', 'true');
+      cleanup();
+      resolve();
+    };
+
+    const onError = (err) => {
+      cleanup();
+      reject(err);
+    };
+
+    target.addEventListener('load', onLoad);
+    target.addEventListener('error', onError);
+
+    if (!existing) {
+      target.src = src;
+      document.head.appendChild(target);
+    } else if (existing.readyState === 'complete') {
+      // 兼容部分浏览器 load 已经触发但 data-loaded 未设置的情况
+      onLoad();
+    }
   });
+
+  scriptPromises.set(src, promise);
+  return promise;
 }
 
 onMounted(async () => {

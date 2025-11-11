@@ -7,6 +7,8 @@ import Lecturer from '../models/Lecturer.js';
 import CertificateModel from '../models/Certificate.js';
 import Partner from '../models/Partner.js';
 import Kindergarten from '../models/Kindergarten.js';
+import Event from '../models/Event.js';
+import BoardChair from '../models/BoardChair.js';
 import MapContinent from '../models/MapContinent.js';
 import MapMarker from '../models/MapMarker.js';
 import locationCatalog from '../services/locationCatalog.js';
@@ -229,6 +231,60 @@ router.get(
       return res.json({ success: true, data });
     } catch (error) {
       console.error('GET /api/public/kindergartens error:', error);
+      return res.status(500).json({ success: false, message: '获取失败' });
+    }
+  }
+);
+
+// 公开：董事会主席
+router.get('/board-chair', async (req, res) => {
+  try {
+    const data = await BoardChair.findAll();
+    return res.json({ success: true, data });
+  } catch (error) {
+    console.error('GET /api/public/board-chair error:', error);
+    return res.status(500).json({ success: false, message: '获取失败' });
+  }
+});
+
+// 公开：活动列表
+router.get(
+  '/events',
+  [
+    query('limit').optional().toInt().isInt({ min: 1, max: 100 }).withMessage('limit 范围 1-100')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+    const limit = req.query.limit || 6;
+    try {
+      const data = await Event.findPublished(limit);
+      return res.json({ success: true, data });
+    } catch (error) {
+      console.error('GET /api/public/events error:', error);
+      return res.status(500).json({ success: false, message: '获取失败' });
+    }
+  }
+);
+
+router.get(
+  '/events/:id',
+  [param('id').toInt().isInt().withMessage('id 必须为整数')],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+    try {
+      const data = await Event.findById(req.params.id);
+      if (!data || data.status !== 'published') {
+        return res.status(404).json({ success: false, message: '未找到活动' });
+      }
+      return res.json({ success: true, data });
+    } catch (error) {
+      console.error('GET /api/public/events/:id error:', error);
       return res.status(500).json({ success: false, message: '获取失败' });
     }
   }

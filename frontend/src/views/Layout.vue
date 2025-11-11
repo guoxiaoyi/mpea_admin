@@ -75,6 +75,30 @@ async function onLogout() {
           <span>合作伙伴</span>
         </RouterLink>
         <RouterLink
+          to="/admin/events"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'events' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+          </svg>
+          <span>MPEA 活动</span>
+        </RouterLink>
+        <RouterLink
+          to="/admin/board-chair"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          :aria-current="['board-chair', 'board-chair-new', 'board-chair-edit'].includes($route.name) ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 12a5 5 0 10-5-5 5 5 0 005 5z" />
+            <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" />
+          </svg>
+          <span>董事会主席</span>
+        </RouterLink>
+        <RouterLink
           to="/admin/kindergartens"
           class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
           aria-current="$route.name === 'kindergartens' ? 'page' : undefined"

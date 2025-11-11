@@ -17,10 +17,10 @@ function setActive(level) {
 
 // Language toggle
 const lang = ref('zh') // 'zh' | 'en'
-const anchors = ['#home', '#about', '#features', '#kindergartens', '#cert', '#join']
+const anchors = ['#home', '#about', '#features', '#board-chair', '#events', '#kindergartens', '#cert', '#join']
 const navLabels = {
-  zh: ['首页', '简介', '业务与优势', '推荐幼儿园', '认证与合作', '加入MPEA'],
-  en: ['Home', 'About', 'Services & Advantages', 'Recommended Kindergartens', 'Certification & Partners', 'Join MPEA'],
+  zh: ['首页', '简介', '业务与优势', '董事会主席', 'MPEA 活动', '推荐幼儿园', '认证与合作', '加入MPEA'],
+  en: ['Home', 'About', 'Services & Advantages', 'Board Chair', 'MPEA Events', 'Recommended Kindergartens', 'Certification & Partners', 'Join MPEA'],
 }
 const heroTitle = {
   zh: 'MPEA蒙台梭利家长教育协会',
@@ -37,6 +37,10 @@ function toggleLang() {
 const kindergartens = ref([])
 const kindergartenLoading = ref(false)
 const apiBase = (import.meta.env.VITE_API_BASE || window.location.origin).replace(/\/$/, '')
+const events = ref([])
+const eventsLoading = ref(false)
+const boardChairs = ref([])
+const boardChairsLoading = ref(false)
 
 function resolveImage(url) {
   if (!url) return ''
@@ -61,8 +65,48 @@ async function loadKindergartens() {
   }
 }
 
+async function loadEvents() {
+  eventsLoading.value = true
+  try {
+    const res = await request.get('/api/public/events', { params: { limit: 6 } })
+    if (res.success) {
+      events.value = Array.isArray(res.data) ? res.data : []
+    }
+  } catch (e) {
+    events.value = []
+  } finally {
+    eventsLoading.value = false
+  }
+}
+
+async function loadBoardChairs() {
+  boardChairsLoading.value = true
+  try {
+    const res = await request.get('/api/public/board-chair')
+    if (res.success) {
+      const data = Array.isArray(res.data) ? res.data : []
+      boardChairs.value = data
+    }
+  } catch (e) {
+    boardChairs.value = []
+  } finally {
+    boardChairsLoading.value = false
+  }
+}
+
+function formatEventDate(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return lang.value === 'zh'
+    ? date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    : date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
 onMounted(() => {
   loadKindergartens()
+  loadEvents()
+  loadBoardChairs()
 })
 </script>
 
@@ -206,6 +250,144 @@ onMounted(() => {
             <div class="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 grid place-content-center">🧑‍🏫</div>
             <h3 class="mt-4 font-semibold text-slate-900">专业师资与认证</h3>
             <p class="mt-2 text-sm text-slate-600">分级讲师与MPC认证支持，保障教学质量。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Board Chair -->
+    <section id="board-chair" class="py-16 sm:py-24 bg-slate-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">
+            {{ lang === 'zh' ? '董事会主席' : 'Board Chair' }}
+          </h2>
+          <p class="mt-2 text-slate-600">
+            {{
+              lang === 'zh'
+                ? '了解协会核心领导者的愿景与故事'
+                : 'Learn about the vision and story from our board leader'
+            }}
+          </p>
+        </div>
+
+        <div class="mt-10">
+          <div v-if="boardChairsLoading" class="rounded-2xl bg-white p-8 ring-1 ring-slate-200 animate-pulse">
+            <div class="flex gap-6">
+              <div class="h-32 w-32 rounded-full bg-slate-200"></div>
+              <div class="flex-1 space-y-3">
+                <div class="h-6 w-56 rounded bg-slate-200"></div>
+                <div class="h-4 w-36 rounded bg-slate-200"></div>
+                <div class="h-3 w-full rounded bg-slate-200"></div>
+                <div class="h-3 w-5/6 rounded bg-slate-200"></div>
+                <div class="h-3 w-4/6 rounded bg-slate-200"></div>
+              </div>
+            </div>
+          </div>
+          <div v-else-if="boardChairs.length > 0" class="grid gap-10 lg:grid-cols-2">
+            <article
+              v-for="chair in boardChairs"
+              :key="chair.id"
+              class="rounded-2xl bg-white p-8 ring-1 ring-slate-200 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <div class="flex flex-col gap-6 md:flex-row md:items-start">
+                <div class="mx-auto shrink-0 md:mx-0">
+                  <div class="h-32 w-32 overflow-hidden rounded-full ring-2 ring-indigo-100">
+                    <img
+                      v-if="chair.avatar"
+                      :src="resolveImage(chair.avatar)"
+                      :alt="lang === 'zh' ? chair.name : chair.nameEn"
+                      class="h-full w-full object-cover"
+                    />
+                    <div v-else class="grid h-full place-content-center text-sm text-slate-400">No Avatar</div>
+                  </div>
+                </div>
+                <div class="flex-1 space-y-4">
+                  <div>
+                    <h3 class="text-xl font-semibold text-slate-900">
+                      {{ lang === 'zh' ? chair.name : chair.nameEn }}
+                    </h3>
+                    <p class="text-sm text-slate-500">
+                      {{ lang === 'zh' ? chair.nameEn : chair.name }}
+                    </p>
+                  </div>
+                  <div
+                    class="prose prose-slate max-w-none prose-p:my-3"
+                    v-html="lang === 'zh' ? (chair.introduction || '') : (chair.introductionEn || '')"
+                  ></div>
+                </div>
+              </div>
+            </article>
+          </div>
+          <div v-else class="rounded-2xl bg-white p-10 text-center text-slate-500 ring-1 ring-slate-200">
+            {{ lang === 'zh' ? '董事会主席信息尚未完善。' : 'Board chair information is coming soon.' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MPEA Events -->
+    <section id="events" class="py-16 sm:py-24 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">
+              {{ lang === 'zh' ? 'MPEA 活动' : 'MPEA Events' }}
+            </h2>
+            <p class="mt-2 text-slate-600">
+              {{
+                lang === 'zh'
+                  ? '了解协会最新活动动态，掌握线下线上精彩瞬间'
+                  : 'Stay updated with our latest events and highlights'
+              }}
+            </p>
+          </div>
+          <a href="#join" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white text-sm hover:bg-indigo-500">
+            {{ lang === 'zh' ? '我要参与' : 'Join an Event' }}
+            <span aria-hidden>→</span>
+          </a>
+        </div>
+
+        <div class="mt-10">
+          <div v-if="eventsLoading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-for="n in 3" :key="n" class="rounded-xl bg-slate-50 p-6 ring-1 ring-slate-200 animate-pulse">
+              <div class="h-4 w-28 rounded bg-slate-200"></div>
+              <div class="mt-4 h-6 w-2/3 rounded bg-slate-200"></div>
+              <div class="mt-3 h-3 w-full rounded bg-slate-200"></div>
+              <div class="mt-2 h-3 w-5/6 rounded bg-slate-200"></div>
+            </div>
+          </div>
+          <div v-else-if="events.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article
+              v-for="item in events"
+              :key="item.id"
+              class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <div class="aspect-[16/9] w-full overflow-hidden bg-slate-100">
+                <img
+                  v-if="item.cover"
+                  :src="resolveImage(item.cover)"
+                  :alt="lang === 'zh' ? item.title : item.titleEn"
+                  class="h-full w-full object-cover"
+                />
+                <div v-else class="grid h-full place-content-center text-sm text-slate-400">No Cover</div>
+              </div>
+              <div class="p-6">
+                <div class="text-xs font-medium uppercase tracking-wide text-indigo-600">
+                  {{ formatEventDate(item.eventDate) }}
+                </div>
+                <h3 class="mt-3 text-lg font-semibold text-slate-900">
+                  {{ lang === 'zh' ? item.title : item.titleEn }}
+                </h3>
+                <div
+                  class="prose prose-sm mt-3 max-w-none text-slate-600 prose-p:my-2"
+                  v-html="lang === 'zh' ? (item.content || '') : (item.contentEn || '')"
+                ></div>
+              </div>
+            </article>
+          </div>
+          <div v-else class="rounded-xl bg-slate-50 p-10 text-center text-slate-500 ring-1 ring-slate-200">
+            {{ lang === 'zh' ? '暂无活动，敬请期待。' : 'No events yet. Stay tuned.' }}
           </div>
         </div>
       </div>

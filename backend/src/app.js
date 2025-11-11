@@ -11,6 +11,8 @@ import publicRoutes from './routes/public.js';
 import certificateRoutes from './routes/certificates.js';
 import partnerRoutes from './routes/partners.js';
 import kindergartenRoutes from './routes/kindergartens.js';
+import eventRoutes from './routes/events.js';
+import boardChairRoutes from './routes/boardChair.js';
 import mapRoutes from './routes/map.js';
 import './config/database.js';
 
@@ -55,6 +57,8 @@ app.use('/api/public', publicRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/partners', partnerRoutes);
 app.use('/api/kindergartens', kindergartenRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/board-chair', boardChairRoutes);
 app.use('/api/map', mapRoutes);
 // 静态文件：上传目录（统一前缀）
 import path from 'node:path';

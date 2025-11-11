@@ -17,6 +17,10 @@ const PartnerList = () => import('../views/partner/PartnerList.vue')
 const PartnerForm = () => import('../views/partner/PartnerForm.vue')
 const KindergartenList = () => import('../views/kindergarten/KindergartenList.vue')
 const KindergartenForm = () => import('../views/kindergarten/KindergartenForm.vue')
+const EventList = () => import('../views/event/EventList.vue')
+const EventForm = () => import('../views/event/EventForm.vue')
+const BoardChairList = () => import('../views/board/BoardChairList.vue')
+const BoardChairForm = () => import('../views/board/BoardChairForm.vue')
 const MapContinentList = () => import('../views/map/ContinentList.vue')
 const MapContinentForm = () => import('../views/map/ContinentForm.vue')
 const MapMarkerList = () => import('../views/map/MarkerList.vue')
@@ -52,6 +56,12 @@ const router = createRouter({
         { path: 'kindergartens', name: 'kindergartens', component: KindergartenList, meta: { requiresAuth: true } },
         { path: 'kindergartens/new', name: 'kindergarten-new', component: KindergartenForm, meta: { requiresAuth: true } },
         { path: 'kindergartens/:id', name: 'kindergarten-edit', component: KindergartenForm, meta: { requiresAuth: true } },
+        { path: 'events', name: 'events', component: EventList, meta: { requiresAuth: true } },
+        { path: 'events/new', name: 'event-new', component: EventForm, meta: { requiresAuth: true } },
+        { path: 'events/:id', name: 'event-edit', component: EventForm, meta: { requiresAuth: true } },
+        { path: 'board-chair', name: 'board-chair', component: BoardChairList, meta: { requiresAuth: true } },
+        { path: 'board-chair/new', name: 'board-chair-new', component: BoardChairForm, meta: { requiresAuth: true } },
+        { path: 'board-chair/:id', name: 'board-chair-edit', component: BoardChairForm, meta: { requiresAuth: true } },
         { path: 'map/continents', name: 'map-continents', component: MapContinentList, meta: { requiresAuth: true } },
         { path: 'map/continents/new', name: 'map-continent-new', component: MapContinentForm, meta: { requiresAuth: true } },
         { path: 'map/continents/:id', name: 'map-continent-edit', component: MapContinentForm, meta: { requiresAuth: true } },
