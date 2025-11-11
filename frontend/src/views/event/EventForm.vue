@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { createEvent, fetchEventDetail, updateEvent } from '@/api/event';
 import { uploadImage } from '@/api/upload';
 import UEditor from '@/components/UEditor.vue';
-import { AppDateTimePicker, AppTimePicker } from '@boichikpro/vue3-date-time-picker';
+import { AppDateTimePicker } from '@boichikpro/vue3-date-time-picker';
 import '@boichikpro/vue3-date-time-picker/assets/style.css';
 import '@boichikpro/vue3-date-time-picker/assets/variables.css';
 import './my-custom-styles.css';

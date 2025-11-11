@@ -12,7 +12,8 @@ const validators = [
   body('nameEn').isString().notEmpty().withMessage('nameEn 必填'),
   body('avatar').isString().notEmpty().withMessage('avatar 必填'),
   body('introduction').optional().isString(),
-  body('introductionEn').optional().isString()
+  body('introductionEn').optional().isString(),
+  body('sortOrder').optional().toInt().isInt().withMessage('sortOrder 必须为整数')
 ];
 
 router.get('/', async (req, res) => {

@@ -13,7 +13,8 @@ const form = ref({
   nameEn: '',
   avatar: '',
   introduction: '',
-  introductionEn: ''
+  introductionEn: '',
+  sortOrder: 0
 });
 const isEdit = ref(false);
 const saving = ref(false);
@@ -59,7 +60,8 @@ async function onSubmit() {
       nameEn: form.value.nameEn,
       avatar: form.value.avatar,
       introduction: form.value.introduction || '',
-      introductionEn: form.value.introductionEn || ''
+      introductionEn: form.value.introductionEn || '',
+      sortOrder: form.value.sortOrder ?? 0
     };
     if (isEdit.value) {
       await updateBoardChair(route.params.id, payload);
@@ -87,7 +89,8 @@ onMounted(async () => {
           nameEn: d.nameEn || '',
           avatar: d.avatar || '',
           introduction: d.introduction || '',
-          introductionEn: d.introductionEn || ''
+          introductionEn: d.introductionEn || '',
+          sortOrder: Number.isFinite(d.sortOrder) ? d.sortOrder : Number(d.sortOrder) || 0
         };
       }
     } catch (e) {
@@ -141,6 +144,16 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700 mb-1">英文介绍</label>
           <UEditor v-model="form.introductionEn" :height="320" server-url="/api/ueditor/controller" />
+        </div>
+
+        <div>
+          <label class="block text-base font-medium text-slate-700">排序</label>
+          <input
+            v-model.number="form.sortOrder"
+            type="number"
+            class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base"
+            placeholder="数字越小越靠前，默认为 0"
+          />
         </div>
 
         <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>

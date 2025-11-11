@@ -29,7 +29,10 @@ async function load() {
   try {
     const res = await fetchBoardChairs();
     if (res.success) {
-      list.value = res.data || [];
+      list.value = (res.data || []).map((item) => ({
+        ...item,
+        sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : Number(item.sortOrder) || 0
+      }));
     }
   } finally {
     loading.value = false;
@@ -69,6 +72,7 @@ onMounted(load);
       </div>
       <UiTable
         :columns="[
+          { key: 'sortOrder', label: '排序', width: '80px' },
           { key: 'avatar', label: '头像', width: '120px' },
           { key: 'name', label: '中文标题' },
           { key: 'nameEn', label: '英文标题' },
@@ -80,6 +84,9 @@ onMounted(load);
         :loading="loading"
         density="comfortable"
       >
+        <template #cell:sortOrder="{ row }">
+          <span class="text-slate-700">{{ row.sortOrder ?? 0 }}</span>
+        </template>
         <template #cell:avatar="{ row }">
           <div class="flex items-center justify-start">
             <img v-if="row.avatar" :src="resolveImage(row.avatar)" alt="头像" class="h-12 w-12 rounded-full object-cover border" />
