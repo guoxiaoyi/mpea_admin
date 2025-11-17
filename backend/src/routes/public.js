@@ -16,6 +16,44 @@ import locationCatalog from '../services/locationCatalog.js';
 
 const router = express.Router();
 
+// 简单的后端多语言提示（仅用于公共接口 message 字段）
+const i18nMessages = {
+  invalidParams: {
+    zh: '参数错误',
+    en: 'Invalid parameters'
+  },
+  contactRateLimited: {
+    zh: '提交过于频繁，请稍后再试',
+    en: 'Too many requests, please try again later'
+  },
+  contactSubmitSuccess: {
+    zh: '提交成功',
+    en: 'Submitted successfully'
+  },
+  contactSubmitFailed: {
+    zh: '提交失败',
+    en: 'Submission failed'
+  }
+};
+
+function getLangFromReq(req) {
+  // 优先使用显式 lang 参数（query 或 body），否则看 Accept-Language
+  const explicit =
+    (typeof req.query?.lang === 'string' && req.query.lang) ||
+    (typeof req.body?.lang === 'string' && req.body.lang);
+  const lang = (explicit || req.headers['accept-language'] || '').toLowerCase();
+  if (lang.startsWith('en')) return 'en';
+  if (lang.startsWith('zh')) return 'zh';
+  return 'zh';
+}
+
+function tMsg(key, req) {
+  const lang = getLangFromReq(req);
+  const entry = i18nMessages[key];
+  if (!entry) return '';
+  return entry[lang] || entry.zh || '';
+}
+
 // 简单的内存防刷（按 IP 限制联系表单提交频率）
 const contactRateLimitStore = new Map();
 const CONTACT_RATE_LIMIT_INTERVAL_MS = 30 * 1000; // 同一 IP 30 秒内只能提交一次
@@ -41,7 +79,7 @@ router.get(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+      return res.status(400).json({ success: false, message: tMsg('invalidParams', req), errors: errors.array() });
     }
     const page = req.query.page || 1;
     const limit = req.query.limit || 10;
@@ -407,7 +445,7 @@ router.post(
 
     const ip = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || req.ip || '';
     if (isContactRateLimited(ip)) {
-      return res.status(429).json({ success: false, message: '提交过于频繁，请稍后再试' });
+      return res.status(429).json({ success: false, message: tMsg('contactRateLimited', req) });
     }
 
     try {
@@ -420,10 +458,10 @@ router.post(
         ip,
         userAgent: req.headers['user-agent'] || ''
       });
-      return res.json({ success: true, message: '提交成功' });
+      return res.json({ success: true, message: tMsg('contactSubmitSuccess', req) });
     } catch (error) {
       console.error('POST /api/public/contact/parenting error:', error);
-      return res.status(500).json({ success: false, message: '提交失败' });
+      return res.status(500).json({ success: false, message: tMsg('contactSubmitFailed', req) });
     }
   }
 );
@@ -440,12 +478,12 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+      return res.status(400).json({ success: false, message: tMsg('invalidParams', req), errors: errors.array() });
     }
 
     const ip = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || req.ip || '';
     if (isContactRateLimited(ip)) {
-      return res.status(429).json({ success: false, message: '提交过于频繁，请稍后再试' });
+      return res.status(429).json({ success: false, message: tMsg('contactRateLimited', req) });
     }
 
     try {
@@ -458,10 +496,10 @@ router.post(
         ip,
         userAgent: req.headers['user-agent'] || ''
       });
-      return res.json({ success: true, message: '提交成功' });
+      return res.json({ success: true, message: tMsg('contactSubmitSuccess', req) });
     } catch (error) {
       console.error('POST /api/public/contact/business error:', error);
-      return res.status(500).json({ success: false, message: '提交失败' });
+      return res.status(500).json({ success: false, message: tMsg('contactSubmitFailed', req) });
     }
   }
 );
