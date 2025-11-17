@@ -86,6 +86,7 @@ onMounted(load);
           { key: 'titleEn', label: '英文标题' },
           { key: 'professionalPhoto', label: '职业照' },
           { key: 'childPhoto', label: '孩子照' },
+          { key: 'featured', label: '首页', width: '80px' },
           { key: 'introduction', label: '介绍' },
           { key: 'introductionEn', label: '英文介绍' },
           { key: 'actions', label: '操作', align: 'right', width: '140px' },
@@ -112,6 +113,14 @@ onMounted(load);
         <template #cell:introductionEn="{ row }">
           <span class="text-slate-600">{{ truncate(row.introductionEn) }}</span>
         </template>
+        <template #cell:featured="{ row }">
+          <span
+            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+            :class="row.featured ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'"
+          >
+            {{ row.featured ? '是' : '否' }}
+          </span>
+        </template>
         <template #cell:actions="{ row }">
           <div class="flex justify-end gap-2">
             <button class="inline-grid place-items-center h-7 w-7 rounded-lg border border-slate-200 hover:bg-slate-50" @click="openEdit(row)" aria-label="编辑">
@@ -126,5 +135,3 @@ onMounted(load);
     </div>
   </div>
 </template>
-
-

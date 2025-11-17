@@ -13,7 +13,8 @@ const form = ref({
   professionalPhoto: '',
   childPhoto: '',
   introduction: '',
-  introductionEn: ''
+  introductionEn: '',
+  featured: false
 });
 const isEdit = ref(false);
 const saving = ref(false);
@@ -45,7 +46,8 @@ async function onSubmit() {
       professionalPhoto: form.value.professionalPhoto,
       childPhoto: form.value.childPhoto,
       introduction: form.value.introduction || '',
-      introductionEn: form.value.introductionEn || ''
+      introductionEn: form.value.introductionEn || '',
+      featured: !!form.value.featured
     };
     if (isEdit.value) {
       await updateCase(route.params.id, payload);
@@ -89,7 +91,8 @@ onMounted(async () => {
           professionalPhoto: d.professionalPhoto || '',
           childPhoto: d.childPhoto || '',
           introduction: d.introduction || '',
-          introductionEn: d.introductionEn || ''
+          introductionEn: d.introductionEn || '',
+          featured: !!d.featured
         };
       }
     } catch (e) {
@@ -153,6 +156,26 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700">英文介绍</label>
           <textarea v-model="form.introductionEn" rows="6" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" placeholder="Case introduction in English" />
+        </div>
+
+        <div>
+          <label class="block text-base font-medium text-slate-700">添加到首页</label>
+          <div class="mt-2 flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              :aria-pressed="form.featured"
+              @click="form.featured = !form.featured"
+              class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors"
+              :class="form.featured ? 'bg-indigo-600' : 'bg-slate-200'"
+            >
+              <span
+                class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform"
+                :class="form.featured ? 'translate-x-6' : 'translate-x-1'"
+              ></span>
+            </button>
+            <span class="text-slate-700 text-base">{{ form.featured ? '是' : '否' }}</span>
+          </div>
         </div>
 
         <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>

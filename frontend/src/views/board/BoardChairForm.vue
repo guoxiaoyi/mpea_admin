@@ -11,6 +11,8 @@ const route = useRoute();
 const form = ref({
   name: '',
   nameEn: '',
+  position: '',
+  positionEn: '',
   avatar: '',
   introduction: '',
   introductionEn: '',
@@ -58,6 +60,8 @@ async function onSubmit() {
     const payload = {
       name: form.value.name,
       nameEn: form.value.nameEn,
+      position: form.value.position || '',
+      positionEn: form.value.positionEn || '',
       avatar: form.value.avatar,
       introduction: form.value.introduction || '',
       introductionEn: form.value.introductionEn || '',
@@ -87,6 +91,8 @@ onMounted(async () => {
         form.value = {
           name: d.name || '',
           nameEn: d.nameEn || '',
+          position: d.position || '',
+          positionEn: d.positionEn || '',
           avatar: d.avatar || '',
           introduction: d.introduction || '',
           introductionEn: d.introductionEn || '',
@@ -121,6 +127,15 @@ onMounted(async () => {
             <label class="block text-base font-medium text-slate-700">英文标题</label>
             <input v-model="form.nameEn" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" placeholder="Title in English" />
           </div>
+        </div>
+
+        <div>
+          <label class="block text-base font-medium text-slate-700">职位</label>
+          <input v-model="form.position" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" placeholder="如：董事会主席、理事等" />
+        </div>
+        <div>
+          <label class="block text-base font-medium text-slate-700">职位（英文）</label>
+          <input v-model="form.positionEn" type="text" class="mt-1 w-full rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 h-12 px-3 text-base" placeholder="Position in English" />
         </div>
 
         <div>

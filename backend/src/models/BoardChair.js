@@ -15,6 +15,8 @@ function mapRow(row) {
     id: row.id,
     name: row.name,
     nameEn: row.name_en ?? row.nameEn,
+    position: row.position,
+    positionEn: row.position_en ?? row.positionEn,
     avatar: row.avatar,
     introduction: row.introduction,
     introductionEn: row.introduction_en ?? row.introductionEn,
@@ -28,7 +30,7 @@ class BoardChair {
   static async findAll() {
     const [rows] = await pool.execute(
       `
-        SELECT id, name, name_en, avatar, introduction, introduction_en, sort_order, created_at, updated_at
+        SELECT id, name, name_en, position, position_en, avatar, introduction, introduction_en, sort_order, created_at, updated_at
         FROM board_chair
         ORDER BY sort_order ASC, created_at DESC
       `
@@ -39,7 +41,7 @@ class BoardChair {
   static async findById(id) {
     const [rows] = await pool.execute(
       `
-        SELECT id, name, name_en, avatar, introduction, introduction_en, sort_order, created_at, updated_at
+        SELECT id, name, name_en, position, position_en, avatar, introduction, introduction_en, sort_order, created_at, updated_at
         FROM board_chair
         WHERE id = ?
         LIMIT 1
@@ -52,12 +54,14 @@ class BoardChair {
   static async create(data) {
     const [result] = await pool.execute(
       `
-        INSERT INTO board_chair (name, name_en, avatar, introduction, introduction_en, sort_order)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO board_chair (name, name_en, position, position_en, avatar, introduction, introduction_en, sort_order)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         normalizeString(data.name),
         normalizeString(data.nameEn),
+        normalizeString(data.position),
+        normalizeString(data.positionEn),
         normalizeString(data.avatar),
         data.introduction || '',
         data.introductionEn || '',
@@ -71,12 +75,14 @@ class BoardChair {
     const [result] = await pool.execute(
       `
         UPDATE board_chair
-        SET name = ?, name_en = ?, avatar = ?, introduction = ?, introduction_en = ?, sort_order = ?
+        SET name = ?, name_en = ?, position = ?, position_en = ?, avatar = ?, introduction = ?, introduction_en = ?, sort_order = ?
         WHERE id = ?
       `,
       [
         normalizeString(data.name),
         normalizeString(data.nameEn),
+        normalizeString(data.position),
+        normalizeString(data.positionEn),
         normalizeString(data.avatar),
         data.introduction || '',
         data.introductionEn || '',

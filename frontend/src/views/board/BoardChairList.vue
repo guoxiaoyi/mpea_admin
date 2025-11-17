@@ -76,6 +76,8 @@ onMounted(load);
           { key: 'avatar', label: '头像', width: '120px' },
           { key: 'name', label: '中文标题' },
           { key: 'nameEn', label: '英文标题' },
+          { key: 'position', label: '职位' },
+          { key: 'positionEn', label: '职位（英文）' },
           { key: 'introduction', label: '中文介绍' },
           { key: 'introductionEn', label: '英文介绍' },
           { key: 'actions', label: '操作', align: 'right', width: '140px' }

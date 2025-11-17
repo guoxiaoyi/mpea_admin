@@ -59,7 +59,8 @@ router.post(
     body('professionalPhoto').isString().notEmpty().withMessage('professionalPhoto 必填'),
     body('childPhoto').isString().notEmpty().withMessage('childPhoto 必填'),
     body('introduction').optional().isString(),
-    body('introductionEn').optional().isString().withMessage('introductionEn 必须为字符串')
+    body('introductionEn').optional().isString().withMessage('introductionEn 必须为字符串'),
+    body('featured').optional().isBoolean().withMessage('featured 必须为布尔值')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -85,7 +86,8 @@ router.put(
     body('professionalPhoto').isString().notEmpty().withMessage('professionalPhoto 必填'),
     body('childPhoto').isString().notEmpty().withMessage('childPhoto 必填'),
     body('introduction').optional().isString(),
-    body('introductionEn').optional().isString().withMessage('introductionEn 必须为字符串')
+    body('introductionEn').optional().isString().withMessage('introductionEn 必须为字符串'),
+    body('featured').optional().isBoolean().withMessage('featured 必须为布尔值')
   ],
   async (req, res) => {
     const errors = validationResult(req);

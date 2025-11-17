@@ -8,11 +8,12 @@ class CaseModel {
       professionalPhoto,
       childPhoto,
       introduction,
-      introductionEn
+      introductionEn,
+      featured
     } = data;
     const [result] = await pool.execute(
-      'INSERT INTO cases (title, title_en, professional_photo, child_photo, introduction, introduction_en) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, titleEn || '', professionalPhoto, childPhoto, introduction || '', introductionEn || '']
+      'INSERT INTO cases (title, title_en, professional_photo, child_photo, introduction, introduction_en, featured) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [title, titleEn || '', professionalPhoto, childPhoto, introduction || '', introductionEn || '', featured ? 1 : 0]
     );
     return result;
   }
@@ -21,7 +22,7 @@ class CaseModel {
     const pageNum = Number(page) || 1;
     const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
     const offset = (pageNum - 1) * limitNum;
-    let query = 'SELECT id, title, title_en AS titleEn, professional_photo AS professionalPhoto, child_photo AS childPhoto, introduction, introduction_en AS introductionEn, created_at, updated_at FROM cases';
+    let query = 'SELECT id, title, title_en AS titleEn, professional_photo AS professionalPhoto, child_photo AS childPhoto, introduction, introduction_en AS introductionEn, featured, created_at, updated_at FROM cases';
     let countQuery = 'SELECT COUNT(*) as total FROM cases';
     const params = [];
     const countParams = [];
@@ -49,7 +50,7 @@ class CaseModel {
 
   static async findById(id) {
     const [rows] = await pool.execute(
-      'SELECT id, title, title_en AS titleEn, professional_photo AS professionalPhoto, child_photo AS childPhoto, introduction, introduction_en AS introductionEn, created_at, updated_at FROM cases WHERE id = ?',
+      'SELECT id, title, title_en AS titleEn, professional_photo AS professionalPhoto, child_photo AS childPhoto, introduction, introduction_en AS introductionEn, featured, created_at, updated_at FROM cases WHERE id = ?',
       [id]
     );
     return rows[0];
@@ -62,11 +63,12 @@ class CaseModel {
       professionalPhoto,
       childPhoto,
       introduction,
-      introductionEn
+      introductionEn,
+      featured
     } = data;
     const [result] = await pool.execute(
-      'UPDATE cases SET title = ?, title_en = ?, professional_photo = ?, child_photo = ?, introduction = ?, introduction_en = ? WHERE id = ?',
-      [title, titleEn || '', professionalPhoto, childPhoto, introduction || '', introductionEn || '', id]
+      'UPDATE cases SET title = ?, title_en = ?, professional_photo = ?, child_photo = ?, introduction = ?, introduction_en = ?, featured = ? WHERE id = ?',
+      [title, titleEn || '', professionalPhoto, childPhoto, introduction || '', introductionEn || '', featured ? 1 : 0, id]
     );
     return result;
   }

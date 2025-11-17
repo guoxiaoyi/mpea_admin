@@ -1,5 +1,5 @@
 import express from 'express';
-import { query, param, validationResult } from 'express-validator';
+import { query, param, body, validationResult } from 'express-validator';
 import Page from '../models/Page.js';
 import News from '../models/News.js';
 import CaseModel from '../models/Case.js';
@@ -11,9 +11,24 @@ import Event from '../models/Event.js';
 import BoardChair from '../models/BoardChair.js';
 import MapContinent from '../models/MapContinent.js';
 import MapMarker from '../models/MapMarker.js';
+import ContactMessage from '../models/ContactMessage.js';
 import locationCatalog from '../services/locationCatalog.js';
 
 const router = express.Router();
+
+// 简单的内存防刷（按 IP 限制联系表单提交频率）
+const contactRateLimitStore = new Map();
+const CONTACT_RATE_LIMIT_INTERVAL_MS = 30 * 1000; // 同一 IP 30 秒内只能提交一次
+
+function isContactRateLimited(ip) {
+  const now = Date.now();
+  const last = contactRateLimitStore.get(ip) || 0;
+  if (now - last < CONTACT_RATE_LIMIT_INTERVAL_MS) {
+    return true;
+  }
+  contactRateLimitStore.set(ip, now);
+  return false;
+}
 
 // 公开：分页列表（仅 published）
 router.get(
@@ -374,6 +389,82 @@ router.post('/continent-photos', async (req, res) => {
     return res.status(500).json({ success: false, message: '获取失败' });
   }
 });
+
+// 公开：联系表单 - 家庭/亲子
+router.post(
+  '/contact/parenting',
+  [
+    body('childAge').optional().toInt().isInt({ min: 0, max: 30 }).withMessage('childAge 范围 0-30'),
+    body('interest').optional().isString().isLength({ max: 255 }).withMessage('兴趣方向过长'),
+    body('contact').isString().notEmpty().withMessage('联系方式必填').isLength({ max: 50 }).withMessage('联系方式过长'),
+    body('problem').optional().isString().isLength({ max: 5000 }).withMessage('问题描述过长')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+
+    const ip = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || req.ip || '';
+    if (isContactRateLimited(ip)) {
+      return res.status(429).json({ success: false, message: '提交过于频繁，请稍后再试' });
+    }
+
+    try {
+      await ContactMessage.create({
+        type: 'parenting',
+        childAge: req.body.childAge,
+        interest: req.body.interest,
+        phone: req.body.contact,
+        problem: req.body.problem,
+        ip,
+        userAgent: req.headers['user-agent'] || ''
+      });
+      return res.json({ success: true, message: '提交成功' });
+    } catch (error) {
+      console.error('POST /api/public/contact/parenting error:', error);
+      return res.status(500).json({ success: false, message: '提交失败' });
+    }
+  }
+);
+
+// 公开：联系表单 - 机构合作
+router.post(
+  '/contact/business',
+  [
+    body('company').optional().isString().isLength({ max: 255 }).withMessage('公司名称过长'),
+    body('orgType').optional().isString().isLength({ max: 255 }).withMessage('机构类型过长'),
+    body('phone').isString().notEmpty().withMessage('联系方式必填').isLength({ max: 50 }).withMessage('联系方式过长'),
+    body('intention').optional().isString().isLength({ max: 5000 }).withMessage('合作意向过长')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: '参数错误', errors: errors.array() });
+    }
+
+    const ip = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || req.ip || '';
+    if (isContactRateLimited(ip)) {
+      return res.status(429).json({ success: false, message: '提交过于频繁，请稍后再试' });
+    }
+
+    try {
+      await ContactMessage.create({
+        type: 'business',
+        company: req.body.company,
+        orgType: req.body.orgType,
+        phone: req.body.phone,
+        intention: req.body.intention,
+        ip,
+        userAgent: req.headers['user-agent'] || ''
+      });
+      return res.json({ success: true, message: '提交成功' });
+    } catch (error) {
+      console.error('POST /api/public/contact/business error:', error);
+      return res.status(500).json({ success: false, message: '提交失败' });
+    }
+  }
+);
 
 export default router;
 

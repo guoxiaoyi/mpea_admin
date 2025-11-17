@@ -10,6 +10,8 @@ router.use(authMiddleware);
 const validators = [
   body('name').isString().notEmpty().withMessage('name 必填'),
   body('nameEn').isString().notEmpty().withMessage('nameEn 必填'),
+  body('position').optional().isString(),
+  body('positionEn').optional().isString(),
   body('avatar').isString().notEmpty().withMessage('avatar 必填'),
   body('introduction').optional().isString(),
   body('introductionEn').optional().isString(),

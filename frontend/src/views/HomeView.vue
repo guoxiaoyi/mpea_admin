@@ -307,6 +307,9 @@ onMounted(() => {
                     <h3 class="text-xl font-semibold text-slate-900">
                       {{ lang === 'zh' ? chair.name : chair.nameEn }}
                     </h3>
+                    <p v-if="chair.position" class="text-sm text-indigo-600">
+                      {{ lang === 'zh' ? chair.position : (chair.positionEn || chair.position) }}
+                    </p>
                     <p class="text-sm text-slate-500">
                       {{ lang === 'zh' ? chair.nameEn : chair.name }}
                     </p>
