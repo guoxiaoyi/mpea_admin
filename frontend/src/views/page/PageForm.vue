@@ -10,6 +10,11 @@ const saving = ref(false);
 const errorMsg = ref('');
 const form = ref({ title: '', path: '', content: '', status: 'draft' });
 const isEdit = ref(false);
+const contentUploading = ref(false);
+
+const handleContentPending = (pending) => {
+  contentUploading.value = pending;
+};
 
 const published = computed({
   get: () => form.value.status === 'published',
@@ -22,6 +27,10 @@ async function onSubmit() {
   errorMsg.value = '';
   if (!form.value.title || !form.value.path) {
     errorMsg.value = '标题和路径必填';
+    return;
+  }
+  if (contentUploading.value) {
+    errorMsg.value = '图片仍在上传，请稍候完成后再保存';
     return;
   }
   saving.value = true;
@@ -89,7 +98,12 @@ onMounted(async () => {
         <div>
           <label class="block text-base font-medium text-slate-700 mb-1">内容</label>
           <div style="max-width: 100%;">
-            <UEditor v-model="form.content" :height="520" server-url="/api/ueditor/controller"/>
+            <UEditor
+              v-model="form.content"
+              :height="520"
+              server-url="/api/ueditor/controller"
+              @pending-change="handleContentPending"
+            />
           </div>
         </div>
         <div>
@@ -114,8 +128,18 @@ onMounted(async () => {
         <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>
       </div>
       <div class="mt-6 flex justify-end gap-2">
+        <p
+          v-if="contentUploading"
+          class="text-sm text-amber-600 mr-auto"
+        >
+          图片上传中，请稍候保存…
+        </p>
         <button class="rounded-md border border-slate-200 px-3 py-2 hover:bg-slate-50" @click="() => router.back()">取消</button>
-        <button :disabled="saving" class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 disabled:opacity-60" @click="onSubmit">
+        <button
+          :disabled="saving || contentUploading"
+          class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 disabled:opacity-60"
+          @click="onSubmit"
+        >
           {{ saving ? '保存中…' : (isEdit ? '更新' : '保存') }}
         </button>
       </div>

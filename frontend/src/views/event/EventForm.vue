@@ -26,6 +26,15 @@ const isEdit = ref(false);
 const saving = ref(false);
 const errorMsg = ref('');
 const uploading = ref(false);
+const contentUploading = ref(false);
+const contentEnUploading = ref(false);
+
+const handleContentPending = (pending) => {
+  contentUploading.value = pending;
+};
+const handleContentEnPending = (pending) => {
+  contentEnUploading.value = pending;
+};
 
 const apiBase = (import.meta.env.VITE_API_BASE || window.location.origin).replace(/\/$/, '');
 
@@ -68,6 +77,10 @@ async function onSubmit() {
   console.log(current.cover)
   if (!current.title || !current.titleEn || !current.eventDate || !current.cover) {
     errorMsg.value = '请填写标题、英文标题、活动时间，并上传封面';
+    return;
+  }
+  if (contentUploading.value || contentEnUploading.value) {
+    errorMsg.value = '图片仍在上传，请稍候完成后再保存';
     return;
   }
   saving.value = true;
@@ -175,11 +188,21 @@ onMounted(async () => {
 
         <div>
           <label class="block text-base font-medium text-slate-700 mb-1">中文内容</label>
-          <UEditor v-model="form.content" :height="360" server-url="/api/ueditor/controller" />
+          <UEditor
+            v-model="form.content"
+            :height="360"
+            server-url="/api/ueditor/controller"
+            @pending-change="handleContentPending"
+          />
         </div>
         <div>
           <label class="block text-base font-medium text-slate-700 mb-1">英文内容</label>
-          <UEditor v-model="form.contentEn" :height="360" server-url="/api/ueditor/controller" />
+          <UEditor
+            v-model="form.contentEn"
+            :height="360"
+            server-url="/api/ueditor/controller"
+            @pending-change="handleContentEnPending"
+          />
         </div>
 
         <div>
@@ -191,8 +214,18 @@ onMounted(async () => {
       </div>
 
       <div class="mt-6 flex justify-end gap-2">
+        <p
+          v-if="contentUploading || contentEnUploading"
+          class="text-sm text-amber-600 mr-auto"
+        >
+          图片上传中，请稍候保存…
+        </p>
         <button class="rounded-md border border-slate-200 px-3 py-2 hover:bg-slate-50" @click="() => router.back()">取消</button>
-        <button :disabled="saving" class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 disabled:opacity-60" @click="onSubmit">
+        <button
+          :disabled="saving || contentUploading || contentEnUploading"
+          class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 disabled:opacity-60"
+          @click="onSubmit"
+        >
           {{ saving ? '保存中…' : (isEdit ? '更新' : '保存') }}
         </button>
       </div>

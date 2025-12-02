@@ -22,6 +22,15 @@ const isEdit = ref(false);
 const saving = ref(false);
 const errorMsg = ref('');
 const uploading = ref(false);
+const introUploading = ref(false);
+const introEnUploading = ref(false);
+
+const handleIntroPending = (pending) => {
+  introUploading.value = pending;
+};
+const handleIntroEnPending = (pending) => {
+  introEnUploading.value = pending;
+};
 
 const apiBase = (import.meta.env.VITE_API_BASE || window.location.origin).replace(/\/$/, '');
 
@@ -53,6 +62,10 @@ async function onSubmit() {
   errorMsg.value = '';
   if (!form.value.name || !form.value.nameEn || !form.value.avatar) {
     errorMsg.value = '请填写中文标题、英文标题并上传头像';
+    return;
+  }
+  if (introUploading.value || introEnUploading.value) {
+    errorMsg.value = '图片仍在上传，请稍候完成后再保存';
     return;
   }
   saving.value = true;
@@ -153,12 +166,22 @@ onMounted(async () => {
 
         <div>
           <label class="block text-base font-medium text-slate-700 mb-1">中文介绍</label>
-          <UEditor v-model="form.introduction" :height="320" server-url="/api/ueditor/controller" />
+          <UEditor
+            v-model="form.introduction"
+            :height="320"
+            server-url="/api/ueditor/controller"
+            @pending-change="handleIntroPending"
+          />
         </div>
 
         <div>
           <label class="block text-base font-medium text-slate-700 mb-1">英文介绍</label>
-          <UEditor v-model="form.introductionEn" :height="320" server-url="/api/ueditor/controller" />
+          <UEditor
+            v-model="form.introductionEn"
+            :height="320"
+            server-url="/api/ueditor/controller"
+            @pending-change="handleIntroEnPending"
+          />
         </div>
 
         <div>
@@ -175,8 +198,18 @@ onMounted(async () => {
       </div>
 
       <div class="mt-6 flex justify-end gap-2">
+        <p
+          v-if="introUploading || introEnUploading"
+          class="text-sm text-amber-600 mr-auto"
+        >
+          图片上传中，请稍候保存…
+        </p>
         <button class="rounded-md border border-slate-200 px-3 py-2 hover:bg-slate-50" @click="() => router.back()">取消</button>
-        <button :disabled="saving" class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 disabled:opacity-60" @click="onSubmit">
+        <button
+          :disabled="saving || introUploading || introEnUploading"
+          class="rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 disabled:opacity-60"
+          @click="onSubmit"
+        >
           {{ saving ? '保存中…' : (isEdit ? '更新' : '保存') }}
         </button>
       </div>

@@ -11,11 +11,16 @@ const props = defineProps({
   // 后端接口地址（留空则使用 VITE_API_BASE 推导）
   serverUrl: { type: String, default: '' },
 });
-const emit = defineEmits(['update:modelValue', 'ready']);
+const emit = defineEmits(['update:modelValue', 'ready', 'pending-change']);
 
 const mountEl = ref(null);
 let editor;
 let containerId = '';
+let editorReady = false;
+let hasPendingUploads = false;
+let mutationObserver;
+let rafId = null;
+let lastSyncedHtml = (typeof props.modelValue === 'string' ? props.modelValue : '') || '';
 
 const scriptPromises = new Map();
 
@@ -93,6 +98,12 @@ onMounted(async () => {
     const apiBase = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) || '';
     const resolvedServerUrl = props.serverUrl || (apiBase ? apiBase + '/api/ueditor/controller' : '/api/ueditor/controller');
 
+    // 全局 config 兜底：关闭自动保存、防止销毁后计时器访问已清理的实例
+    if (window.UEDITOR_CONFIG) {
+      window.UEDITOR_CONFIG.enableAutoSave = false;
+      window.UEDITOR_CONFIG.saveInterval = 0;
+    }
+
     // 启用并扩展 XSS 白名单，追加 section 的 class/style
     if (window.UEDITOR_CONFIG) {
       window.UEDITOR_CONFIG.xssFilterRules = true;
@@ -103,6 +114,37 @@ onMounted(async () => {
       window.UEDITOR_CONFIG.whitList = wl;
     }
 
+    const scheduleSync = () => {
+      if (!editor) return;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (!editor) return;
+        const html = editor.getContent();
+        const pending = !!editor.body?.querySelector('.loadingclass');
+        if (pending !== hasPendingUploads) {
+          hasPendingUploads = pending;
+          emit('pending-change', pending);
+        }
+        if (html !== lastSyncedHtml) {
+          lastSyncedHtml = html;
+          emit('update:modelValue', html);
+        }
+      });
+    };
+
+    const startObserver = () => {
+      if (!editor?.body) return;
+      mutationObserver?.disconnect();
+      mutationObserver = new MutationObserver(() => scheduleSync());
+      mutationObserver.observe(editor.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'src', 'style'],
+      });
+    };
+
     editor = window.UE.getEditor(containerId, {
       initialFrameWidth: '100%',
       initialFrameHeight: props.height,
@@ -111,12 +153,14 @@ onMounted(async () => {
     });
 
     editor.addListener('ready', () => {
+      editorReady = true;
       if (props.modelValue) editor.setContent(props.modelValue);
+      lastSyncedHtml = editor.getContent();
+      startObserver();
+      scheduleSync();
       emit('ready');
     });
-    editor.addListener('contentChange', () => {
-      emit('update:modelValue', editor.getContent());
-    });
+    editor.addListener('contentChange', scheduleSync);
   } catch (e) {
     // 简单兜底，避免页面阻断
     console.error('UEditor init error:', e);
@@ -124,14 +168,33 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  if (hasPendingUploads) {
+    emit('pending-change', false);
+    hasPendingUploads = false;
+  }
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+  if (mutationObserver) {
+    mutationObserver.disconnect();
+    mutationObserver = null;
+  }
+  if (editor?._saveFlag) {
+    window.clearTimeout(editor._saveFlag);
+    editor._saveFlag = null;
+  }
   try { editor?.destroy(); } catch (_) {}
   editor = null;
+  editorReady = false;
 });
 
 watch(() => props.modelValue, (v) => {
-  if (!editor) return;
+  if (!editor || !editorReady || !editor.body) return;
   const cur = editor.getContent();
-  if ((v || '') !== cur) editor.setContent(v || '');
+  const next = v || '';
+  if (next !== cur) editor.setContent(next);
+  lastSyncedHtml = next;
 });
 </script>
 
