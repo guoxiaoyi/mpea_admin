@@ -43,6 +43,19 @@ async function onLogout() {
           <span>页面管理</span>
         </RouterLink>
         <RouterLink
+          to="/admin/translations"
+          class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
+          aria-current="$route.name === 'translations' ? 'page' : undefined"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 3a9 9 0 100 18 9 9 0 000-18z" />
+            <path d="M3 12h18" />
+            <path d="M12 3a15 15 0 010 18" />
+            <path d="M12 3a15 15 0 000 18" />
+          </svg>
+          <span>多语言文案</span>
+        </RouterLink>
+        <RouterLink
           to="/admin/cases"
           class="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5 aria-[current=page]:bg-white/10 aria-[current=page]:text-white"
           aria-current="$route.name === 'cases' ? 'page' : undefined"

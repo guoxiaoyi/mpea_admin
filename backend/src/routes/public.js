@@ -12,9 +12,23 @@ import BoardChair from '../models/BoardChair.js';
 import MapContinent from '../models/MapContinent.js';
 import MapMarker from '../models/MapMarker.js';
 import ContactMessage from '../models/ContactMessage.js';
+import Translation from '../models/Translation.js';
 import locationCatalog from '../services/locationCatalog.js';
 
 const router = express.Router();
+const DEFAULT_I18N_LOCALES = ['zh', 'en'];
+const CONFIGURED_I18N_LOCALES = (process.env.I18N_LOCALES || '')
+  .split(',')
+  .map((item) => item.trim().toLowerCase())
+  .filter(Boolean);
+const I18N_LOCALES = CONFIGURED_I18N_LOCALES.length ? CONFIGURED_I18N_LOCALES : DEFAULT_I18N_LOCALES;
+
+function normalizeLocale(input) {
+  const lower = (input || '').toLowerCase();
+  if (I18N_LOCALES.includes(lower)) return lower;
+  const matched = I18N_LOCALES.find((item) => lower.startsWith(item));
+  return matched || I18N_LOCALES[0];
+}
 
 // 简单的后端多语言提示（仅用于公共接口 message 字段）
 const i18nMessages = {
@@ -92,6 +106,17 @@ router.get(
     }
   }
 );
+
+router.get('/i18n/:locale', async (req, res) => {
+  try {
+    const locale = normalizeLocale(req.params.locale);
+    const data = await Translation.exportLocale(locale);
+    return res.json({ success: true, data, locale });
+  } catch (error) {
+    console.error('GET /api/public/i18n/:locale error:', error);
+    return res.status(500).json({ success: false, message: '获取失败' });
+  }
+});
 
 // 公开：按 path 获取（仅 published）
 router.get(

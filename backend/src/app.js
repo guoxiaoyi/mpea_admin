@@ -15,6 +15,7 @@ import eventRoutes from './routes/events.js';
 import boardChairRoutes from './routes/boardChair.js';
 import mapRoutes from './routes/map.js';
 import contactMessageRoutes from './routes/contactMessages.js';
+import translationRoutes from './routes/translations.js';
 import './config/database.js';
 
 dotenv.config();
@@ -62,6 +63,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/board-chair', boardChairRoutes);
 app.use('/api/map', mapRoutes);
 app.use('/api/contact-messages', contactMessageRoutes);
+app.use('/api/translations', translationRoutes);
 // 静态文件：上传目录（统一前缀）
 import path from 'node:path';
 import expressStatic from 'express';

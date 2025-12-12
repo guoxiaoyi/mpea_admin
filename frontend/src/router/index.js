@@ -26,6 +26,7 @@ const MapContinentForm = () => import('../views/map/ContinentForm.vue')
 const MapMarkerList = () => import('../views/map/MarkerList.vue')
 const MapMarkerForm = () => import('../views/map/MarkerForm.vue')
 const ContactList = () => import('../views/contact/ContactList.vue')
+const TranslationList = () => import('../views/i18n/TranslationList.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,6 +72,7 @@ const router = createRouter({
         { path: 'map/markers/:id', name: 'map-marker-edit', component: MapMarkerForm, meta: { requiresAuth: true } },
         { path: 'ai-images', name: 'ai-images', component: QwenImage, meta: { requiresAuth: true } },
         { path: 'contact-messages', name: 'contact-messages', component: ContactList, meta: { requiresAuth: true } },
+        { path: 'translations', name: 'translations', component: TranslationList, meta: { requiresAuth: true } },
       ]
     },
     {
